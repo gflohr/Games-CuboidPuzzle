@@ -1,0 +1,292 @@
+=head1 NAME 
+
+Games::RubiksCube - A Perl Representation of the Rubik's Cube Puzzle
+
+=head1 SYNOPSIS
+
+    use Games::RubiksCube;
+
+    $cube = Games::RubiksCube->new(%args);
+
+=head1 STATUS
+
+Work in progress.
+
+=head1 DESCRIPTION
+
+B<Games::RubiksCube> is a Perl library that can represent any legal (and
+illegal) state of a family of 3D puzzles known under the name of Rubik's Cube.
+
+The module supports arbitrary sizes of the puzzle, and also different widths
+in all three dimensions.  The default cube is a 3x3x3 cube but you can also
+experiment with a 2x3x4 cube.  Depending on the cube layout, some layers
+can only be rotated by 180 degrees.
+
+The cube design that the documentation is based on is as follows:
+
+                        y
+     z                /
+     |     +---+---+---+
+     |    / Y / Y / Y /|
+     |   +---+---+---+R|
+     |  / Y / Y / Y /| +
+     | +---+---+---+R|/|
+     |/ Y / Y / Y /| +R|
+     +---+---+---+R|/| +
+     | B | B | B | +R|/|
+     |   |   |   |/| +R|
+     +---+---+---+R|/| +
+     | B | B | B | +R|/
+     |   |   |   |/| +
+     +---+---+---+R|/
+     | B | B | B | +
+     |   |   |   |/
+     +---+---+---+.......x
+
+B stands for blue, R for red, and Y for yellow.  The opposite side of blue
+is green (G), the opposite side of yellow is white (W), and the opposite side
+of red is orange (O).
+
+The axes are in the conventional orientation:
+
+   z|
+    |  y
+    | /
+    |/
+    +---------x
+
+Less challenging for ASCII art is this representation, where the cube is
+unfolded:
+
+          G G G
+          G G G
+          G G G
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+          B B B
+          B B B
+          B B B
+
+=head2 Outer Planes (Faces) and Moves Notation
+
+The 6 faces are identified with capital letters.  Rotating a plane in
+clock-wise direction is notated with the letter of the plane (for example
+L); rotating it in anti-clock-wise direction is notated with the plane letter
+follows by a single quote or apostrophe (for example L', pronounced L prime).
+Rotating it twice is denoted by the plane letter followed by a 2 for example
+L2.  There is no L3 because it has the same effect as L'.
+
+The "arrows" in the following diagrams show the rotation in clock-wise
+direction.  It is easier to grasp, if you remember that you close a bottle
+by turning the lid in clock-wise direction.
+
+=head3 Left (L)
+
+      /L....
+     /L...::
+    |L . .::
+    |L . .:
+    vL . .
+
+=head3 Right (R)
+
+       ...^R
+      .../RR
+     . .|RRR
+     . .|RR
+     . .|R
+
+=head3 Up (U)
+
+       U.U.U
+      U U U:
+    <U-U-U+:
+     . . .|
+     . . .
+
+=head3 Down (D)
+
+       .....
+      ....::
+     . . .:D ^
+     . . .D /
+     D D D /
+     -----+
+
+=head3 Front (F)
+
+       .....
+      ----+:
+     F F F|:
+     F F F|
+     F F Fv
+
+=head3 Back (B)
+        <---+
+       B.B.B|
+      .....B|
+     . . .:B
+     . . .:
+     . . .
+
+=head2 Slices
+
+The three slices are:
+
+=head3 Middle Layer (M) (between L and R)
+
+       ./M..
+      ./M.::
+     .|M .::
+     .|M .:
+     .vM .
+
+Direction-wise, it follows the left layer.
+
+=head3 Standing Layer (S) (between F and B)
+
+       .....
+      S-S-S+
+     . . .S|
+     . . .Sv
+     . . .
+
+Direction-wise it follows the front layer.
+
+=head3 Equatorial Layer (M) (between U and D)
+
+       .....
+      ....:E^
+     . . .E/
+     E-E-E+
+     . . .
+
+Direction-wise it follows the front layer.
+
+=head2 Faces and Slices
+
+Rotating a face together with its adjacent slice is denoted by the code of the
+face as lowercase:
+
+=over 4
+
+=item B<l> for left (L) and middle layer (M)
+
+=item B<r> for right (R) and middle layer (M)
+
+=item B<f> for front (F) and standing layer (S)
+
+=item B<b> for back (B) and standing layer (S)
+
+=item B<u> for up (U) and equatorial layer (E)
+
+=item B<d> for down (D) and equatorial layer (E)
+
+=back
+
+=head2 Cube Turns
+
+Cube Turns are denoted by the letters x, y, and z (both cases are used).  The
+direction is always the opposite of the corresponding slice turn.
+
+=head3 X (R, M, and L)
+
+The direction is the same as R.
+
+=head3 Y (U, E, and D)
+
+The direction is the same as U.
+
+=head3 Z (F, S, and B)
+
+The direction is the same as F.
+
+=head1 CONSTRUCTORS
+
+=over 4
+
+=item B<new ARGS>
+
+This constructor accepts the following dnamed arguments:
+
+=over 4
+
+=item B<xwidth>
+
+The number of cubelets on the x-axis, defaults to 3.
+
+=item B<ywidth>
+
+The number of cubelets on the y-axis, defaults to 3.
+
+=item B<zwidth>
+
+The number of cubelets on the z-axis, defaults to 3.
+
+=item B<colors>
+
+A reference to an array of 6 characters that denote the colors of the
+cube, defaults to C<['G', 'O', 'W', 'R', 'Y', 'B']> for the default cube design
+(green, orange, white, red, yellow, blue):
+
+
+          G G G
+          G G G
+          G G G
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+          B B B
+          B B B
+          B B B
+
+This represents a standard cube where front face F is blue, and the upside
+face U is yellow.  The blue face is folded towards you, the green one away
+from you, the orange one to the left, and the yellow and red faces are peeled
+of to the right.
+
+=back
+
+=back
+
+=head2 Internal Notation
+
+The above notations for the faces and layers (F, B, R, L, U, and D) are in
+fact aliases that are only valid for cubes where all sides are between two and
+three cubelets wide.
+
+=head3 Faces, Slices, and Turns
+
+The internal notation, that is always valid, identifies
+the plane by the coordinate that stays constant.  For example, the plane
+3z is the plane where all cubelets have the z-coordinate 3:
+
+           /y
+     ^   @ @ @ 
+    z| @ @ @:
+    3|@ @ @::
+    2|.....:
+    1|.....
+     +---------x
+      1 2 3
+
+Turns must always be around the corresponding axis in clock-wise direction and
+are identified by the name of the layer followed by the number of 90 degrees
+turns to make (between 1 and 3).  The conventional turn C<F> translates to C<1y1>
+in internal notation.  And C<3x3> is C<R'> in conventional notation.
+
+=head3 Cube Rotations
+
+Cube turns are denoted by the axis around which the cube is turned, preceded
+by a 0, for example 0z1.  The leading 0 is mandatory, so that it can be
+distinguished from the conventional cube turns for 3x3x3 cubes that use
+different axes orientations.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
+
+=head1 SEE ALSO
+
+perl(1)
