@@ -83,7 +83,53 @@ sub __setup {
 	my @dim_keys = qw(__xwidth __ywidth __zwidth);
 	my ($x, $y, $z) = @{$self}{@dim_keys};
 
-	# First side. We fill the 
+	# First side (green).
+	@state[0 .. $x * $z - 1] = map { $self->{__colors}->[0] } (1 .. $x * $z);
+
+	# Second side (orange).
+	foreach (my $row = 0; $row < $y; ++$row) {
+		foreach (my $col = 0; $col < $z; ++$col) {
+			my $offset = $x * $z
+				+ $row * ($z + $x) * 2
+				+ $col;
+			$state[$offset] = $self->{__colors}->[1];
+		}
+	}
+
+	# Third side (white).
+	foreach (my $row = 0; $row < $y; ++$row) {
+		foreach (my $col = 0; $col < $x; ++$col) {
+			my $offset = $x * $z + $z
+				+ $row * ($z + $x) * 2
+				+ $col;
+			$state[$offset] = $self->{__colors}->[2];
+		}
+	}
+
+	# Fourth side (red).
+	foreach (my $row = 0; $row < $y; ++$row) {
+		foreach (my $col = 0; $col < $z; ++$col) {
+			my $offset = $x * $z + $z + $x
+				+ $row * ($z + $x) * 2
+				+ $col;
+			$state[$offset] = $self->{__colors}->[3];
+		}
+	}
+
+	# Fifth side (yellow).
+	foreach (my $row = 0; $row < $y; ++$row) {
+		foreach (my $col = 0; $col < $x; ++$col) {
+			my $offset = $x * $z + $z + $x + $z
+				+ $row * ($z + $x) * 2
+				+ $col;
+			$state[$offset] = $self->{__colors}->[4];
+		}
+	}
+
+	# Sixth side (blue).
+	my $offset = $x * $z + ($z + $x) * 6;
+	@state[$offset .. $offset + $x * $z - 1] =
+		map { $self->{__colors}->[5] } (1 .. $x * $z);
 
 	return $self;
 }
