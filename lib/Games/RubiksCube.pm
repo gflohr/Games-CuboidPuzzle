@@ -127,7 +127,7 @@ sub __setup {
 	}
 
 	# Sixth side (blue).
-	my $offset = $x * $z + ($z + $x) * 6;
+	my $offset = $x * $z + ($z + $x) * 2 * $y;
 	@state[$offset .. $offset + $x * $z - 1] =
 		map { $self->{__colors}->[5] } (1 .. $x * $z);
 
@@ -141,5 +141,7 @@ sub ywidth { shift->{__ywidth} }
 sub zwidth { shift->{__zwidth} }
 
 sub colors { shift->{__colors} }
+
+sub state { @{shift->{__state}} }
 
 1;

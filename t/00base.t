@@ -17,6 +17,24 @@ my $cube = $package->new;
 ok $cube, 'constructor';
 isa_ok($cube, $package, 'isa');
 
+use Games::RubiksCube::Renderer::Simple;
+
+my $renderer = Games::RubiksCube::Renderer::Simple->new;
+my $got = $renderer->render($cube);
+$wanted = <<'EOF';
+      G G G 
+      G G G 
+      G G G 
+O O O W W W R R R Y Y Y 
+O O O W W W R R R Y Y Y 
+O O O W W W R R R Y Y Y 
+      B B B 
+      B B B 
+      B B B 
+EOF
+
+is $got, $wanted, 'simple renderer';
+
 done_testing;
 
 1;

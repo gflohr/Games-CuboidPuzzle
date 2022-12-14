@@ -1,0 +1,41 @@
+=head1 NAME 
+
+Games::RubiksCube::Renderer - Abstract base class for cube renderers
+
+=head1 SYNOPSIS
+
+    die "Games::RubiksCube::Renderer is an abstract base class"
+
+=head1 DESCRIPTION
+
+Sub-classes of B<Games::RubriksCube::Renderer> can create a graphical
+representation of a cube.
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item B<new([%ARGS])>
+
+See the documentation of the sub-classes
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item B<render(CUBE, [%ARGS])
+
+Returns a string representation of B<CUBE>.  For possible named arguments,
+see the documentation of the sub-classes.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
+
+=head1 SEE ALSO
+
+L<Games::RubiksCube>, perl(1)

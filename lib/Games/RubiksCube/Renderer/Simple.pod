@@ -1,0 +1,72 @@
+=head1 NAME 
+
+Games::RubiksCube::Renderer::Simple - Simple renderer for cubes
+
+=head1 SYNOPSIS
+
+    use Games::RubiksCube::Renderer::Simple;
+
+    $renderer = Games::RubiksCube::Renderer::Simple->new;
+    print $renderer->render($cube, %args);
+
+=head1 DESCRIPTION
+
+B<Games::RubriksCube::Renderer::Simple> inherits from
+L<Games::RubriksCube::Renderer>.
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item B<new>
+
+The constructor takes no arguments.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item B<render>
+
+Returns a string representation of the cube.  A 3x3 cube with the standard
+color scheme would yield this representation:
+
+          G G G
+          G G G
+          G G G
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+    O O O W W W R R R Y Y Y
+          B B B
+          B B B
+          B B B
+
+The characters stand 4:
+
+=over 4
+
+=item G: green
+
+=item O: orange
+
+=item W: white
+
+=item R: red
+
+=item Y: yellow
+
+=item B: blue
+
+=back
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
+
+=head1 SEE ALSO
+
+L<Games::RubiksCube::Renderer>, L<Games::RubiksCube>, perl(1)
