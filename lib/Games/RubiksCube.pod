@@ -253,13 +253,19 @@ of to the right.
 =head2 Internal Notation
 
 The above notations for the faces and layers (F, B, R, L, U, and D) are in
-fact aliases that are only valid for cubes where all sides are between two and
-three cubelets wide.
+fact aliases that are only valid for cubes where the layer in question is
+between one and three cubelets wide.
+
+Their lowercase versions (f, b, r, l, u, and d) are only valid for cubes where
+the layer in question is three or two cubelets wide.
+
+The slice moves (M, E, and S) are only defined for cubes where the layer in
+question is one or three cubelets wide.
 
 =head3 Faces, Slices, and Turns
 
 The internal notation, that is always valid, identifies
-the plane by the coordinate that stays constant.  For example, the plane
+the plane by the coordinate that is constant.  For example, the plane
 3z is the plane where all cubelets have the z-coordinate 3:
 
            /y
@@ -275,6 +281,12 @@ Turns must always be around the corresponding axis in clock-wise direction and
 are identified by the name of the layer followed by the number of 90 degrees
 turns to make (between 1 and 3).  The conventional turn C<F> translates to C<1y1>
 in internal notation.  And C<3x3> is C<R'> in conventional notation.
+
+For turning multiple layers, the width of the layers has to be inserted right
+after the axis.  For example, the move C<3x21> is C<r> in conventional
+notation. The C<3x> denotes the layer where all cubelets have the x-coordinate
+3, the following 2 means that two layers are turned at once, and the final 1
+denotes that the layers are turned once in clock-wise direction.
 
 =head3 Cube Rotations
 

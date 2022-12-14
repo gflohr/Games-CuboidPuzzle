@@ -144,4 +144,164 @@ sub colors { shift->{__colors} }
 
 sub state { @{shift->{__state}} }
 
+sub move {
+	my ($self, $move) = @_;
+
+	if ($move =~ /([RrMLlUuEDdFfSBb])([1-3'])?$/) {
+		my $original_move = $move;
+		$move = $1;
+		my $count = $2 || 1;
+		$count = 3 if $count eq "'";
+		my $translator = "__translate$move";
+		$move = $self->$translator($move);
+		if (!$move) {
+			require Carp;
+			Carp::croak(__x("invalid move '{move}' for this cube",
+				move => $original_move));
+		}
+		$move .= $count;
+	}
+
+
+	return $self;
+}
+
+sub __translateR {
+	my ($self, $move) = @_;
+
+	if ($self->xwidth == 3) {
+		return '3x';
+	} elsif ($self->xwidth == 2) {
+		return '2x';
+	} elsif ($self->xwidth == 1) {
+		return '1x';
+	}
+
+	return;
+}
+
+sub __translateM {
+	my ($self, $move) = @_;
+
+	if ($self->xwidth == 3) {
+		return '2x';
+	} elsif ($self->xwidth == 1) {
+		return '1x';
+	}
+
+	return;
+}
+
+sub __translateL {
+	my ($self, $move) = @_;
+
+	if ($self->xwidth <= 3) {
+		return '1x';
+	}
+
+	return;
+}
+
+sub __translateF {
+	my ($self, $move) = @_;
+
+	if ($self->ywidth <= 3) {
+		return '1y';
+	}
+
+	return;
+}
+
+sub __translateS {
+	my ($self, $move) = @_;
+
+	if ($self->ywidth == 3) {
+		return '2y';
+	} elsif ($self->ywidth == 1) {
+		return '1y';
+	}
+
+	return;
+}
+
+sub __translateB {
+	my ($self, $move) = @_;
+
+	if ($self->ywidth == 3) {
+		return '3y';
+	} elsif ($self->ywidth == 2) {
+		return '2y';
+	} elsif ($self->ywidth == 1) {
+		return '1y';
+	}
+
+	return;
+}
+
+sub __translateD {
+	my ($self, $move) = @_;
+
+	if ($self->zwidth <= 3) {
+		return '1z';
+	}
+
+	return;
+}
+
+sub __translateE {
+	my ($self, $move) = @_;
+
+	if ($self->zwidth == 3) {
+		return '2z';
+	} elsif ($self->zwidth == 1) {
+		return '1z';
+	}
+
+	return;
+}
+
+sub __translateU {
+	my ($self, $move) = @_;
+
+	if ($self->zwidth == 3) {
+		return '3z';
+	} elsif ($self->zwidth == 2) {
+		return '2z';
+	} elsif ($self->zwidth == 1) {
+		return '1z';
+	}
+
+	return;
+}
+
+sub __translater {
+	my ($self, $move) = @_;
+
+	if ($self->xwidth == 3) {
+		return '2x';
+	}
+
+	return;
+}
+
+sub __translatel {
+	my ($self, $move) = @_;
+
+	if ($self->xwidth == 3) {
+		return '2x';
+	}
+
+	return;
+}
+
+sub __translatef {
+	my ($self, $move) = @_;
+
+	if ($self->ywidth <= 3) {
+		return '1y';
+	}
+
+	return;
+}
+
 1;
