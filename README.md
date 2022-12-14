@@ -20,7 +20,7 @@ Work in progress.
 Via CPAN:
 
 ```shell
-$ perl -MCPAN -e install 'File::Globstar'
+$ perl -MCPAN -e install 'Games::RubiksCube'
 ```
 
 From source:
@@ -28,7 +28,7 @@ From source:
 ```shell
 $ perl Build.PL
 Created MYMETA.yml and MYMETA.json
-Creating new 'Build' script for 'File-Globstar' version '0.1'
+Creating new 'Build' script for 'Games-RubiksCube' version '0.1'
 $ ./Build
 $ ./Build install
 ```
@@ -36,8 +36,8 @@ $ ./Build install
 From source with "make":
 
 ```shell
-$ git clone https://github.com/gflohr/File-Globstar.git
-$ cd File-Globstar
+$ git clone https://github.com/gflohr/Games-RubiksCube.git
+$ cd Games-RubiksCube
 $ perl Makefile.PL
 $ make
 $ make install

@@ -283,6 +283,35 @@ by a 0, for example 0z1.  The leading 0 is mandatory, so that it can be
 distinguished from the conventional cube turns for 3x3x3 cubes that use
 different axes orientations.
 
+=head3 Cube State
+
+The internal representation of the cube is a list, each item representing a
+sticker.
+
+Example: We take a cube with 4 cubelets in x-direction, 3 in y-direction, and
+2 in z-direction.  Unfolded it would look like this (with standard colors)
+
+        G G G G
+        G G G G
+    O O W W W W R R Y Y Y Y
+    O O W W W W R R Y Y Y Y
+    O O W W W W R R Y Y Y Y
+        B B B B
+        B B B B
+
+The array indices of the stickers would be:
+
+        0 1 2 3
+        4 5 6 7
+    8 9 A B C D E F G H I J
+    K L M N O P Q R S T U V
+    W X Y Z a b c d e f g h
+        i j k l
+        m n o p
+
+The clever ones will have guessed already that A-F stands for 10-35, and a-p for
+36-52.
+
 =head1 COPYRIGHT
 
 Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
