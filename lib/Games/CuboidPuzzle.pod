@@ -17,7 +17,7 @@ Work in progress.
 
 The origin of this file is a POD document.  The conversion from POD to HTML
 that is used by github.com has flaws.  Please read this file with the command
-`perldoc lib/Games/CuboidPuzzle.pod`!
+C<perldoc lib/Games/CuboidPuzzle.pod>!
 
 =head1 DESCRIPTION
 
