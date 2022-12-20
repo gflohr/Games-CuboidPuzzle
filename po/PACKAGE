@@ -5,7 +5,7 @@
 LINGUAS = de
 
 # Textdomain for our package.
-TEXTDOMAIN = Games-RubiksCube
+TEXTDOMAIN = Games-CuboidPuzzle
 
 # Initial copyright holder added to pot and po files.
 COPYRIGHT_HOLDER = Guido Flohr

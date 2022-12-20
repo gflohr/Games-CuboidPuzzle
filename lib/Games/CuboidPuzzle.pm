@@ -10,9 +10,9 @@
 # http://www.wtfpl.net/ for more details.
 
 # This next lines is here to make Dist::Zilla happy.
-# ABSTRACT: A Perl Representation of the Rubik's Cube Puzzle
+# ABSTRACT: A Perl Representation of cuboid puzzles like the Rubik's Cube
 
-package Games::RubiksCube;
+package Games::CuboidPuzzle;
 
 use strict;
 use v5.10;

@@ -1,10 +1,10 @@
 =head1 NAME 
 
-Games::RubiksCube::Renderer - Abstract base class for cube renderers
+Games::CuboidPuzzle::Renderer - Abstract base class for cube renderers
 
 =head1 SYNOPSIS
 
-    die "Games::RubiksCube::Renderer is an abstract base class"
+    die "Games::CuboidPuzzle::Renderer is an abstract base class"
 
 =head1 DESCRIPTION
 
@@ -38,4 +38,4 @@ Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
 
 =head1 SEE ALSO
 
-L<Games::RubiksCube>, perl(1)
+L<Games::CuboidPuzzle>, perl(1)

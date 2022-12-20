@@ -1,12 +1,13 @@
 =head1 NAME 
 
-Games::RubiksCube - A Perl Representation of the Rubik's Cube Puzzle
+Games::CuboidPuzzle - A Perl Representation of Cuboid Puzzles Like the Rubik's
+Cube
 
 =head1 SYNOPSIS
 
-    use Games::RubiksCube;
+    use Games::CuboidPuzzle;
 
-    $cube = Games::RubiksCube->new(%args);
+    $cube = Games::CuboidPuzzle->new(%args);
 
 =head1 STATUS
 
@@ -14,8 +15,9 @@ Work in progress.
 
 =head1 DESCRIPTION
 
-B<Games::RubiksCube> is a Perl library that can represent any legal (and
-illegal) state of a family of 3D puzzles known under the name of Rubik's Cube.
+B<Games::CuboidPuzzle> is a Perl library that can represent any legal (and
+illegal) state of a family of 3D puzzles, the most well-known of which is the
+Rubik's Cube.
 
 The module supports arbitrary sizes of the puzzle, and also different widths
 in all three dimensions.  The default cube is a 3x3x3 cube but you can also

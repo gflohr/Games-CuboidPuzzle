@@ -1,12 +1,12 @@
-# Games-RubiksCube
+# Games-CuboidPuzzle
 
-This library implements a Perl Representation of the Rubik's Cube Puzzle in
-arbitrary sizes.
+This library implements a Perl Representation of cuboid puzzles in arbitrary
+sizes.  The most famous cuboid puzzle is the 3x3 Rubik's cube.
 
-See [Games::RubiksCube](https://github.com/gflohr/Games-RubiksCube/blob/master/lib/Games/RubiksCube.pod)
+See [Games::CuboidPuzzle](https://github.com/gflohr/Games-CuboidPuzzle/blob/master/lib/Games/CuboidPuzzle.pod)
 for more information.
 
-- [Games-RubiksCube](#games-rubikscube)
+- [Games-CuboidPuzzle](#games-cuboidpuzzle)
 	- [Status](#status)
 	- [Installation](#installation)
 	- [Copyright](#copyright)
@@ -20,7 +20,7 @@ Work in progress.
 Via CPAN:
 
 ```shell
-$ perl -MCPAN -e install 'Games::RubiksCube'
+$ perl -MCPAN -e install 'Games::CuboidPuzzle'
 ```
 
 From source:
@@ -28,7 +28,7 @@ From source:
 ```shell
 $ perl Build.PL
 Created MYMETA.yml and MYMETA.json
-Creating new 'Build' script for 'Games-RubiksCube' version '0.1'
+Creating new 'Build' script for 'Games-CuboidPuzzle' version '0.1'
 $ ./Build
 $ ./Build install
 ```
@@ -36,8 +36,8 @@ $ ./Build install
 From source with "make":
 
 ```shell
-$ git clone https://github.com/gflohr/Games-RubiksCube.git
-$ cd Games-RubiksCube
+$ git clone https://github.com/gflohr/Games-CuboidPuzzle.git
+$ cd Games-CuboidPuzzle
 $ perl Makefile.PL
 $ make
 $ make install

@@ -9,7 +9,7 @@
 
 use Test::More;
 
-my $package = 'Games::RubiksCube';
+my $package = 'Games::CuboidPuzzle';
 
 require_ok($package);
 
@@ -17,9 +17,9 @@ my $cube = $package->new;
 ok $cube, 'constructor';
 isa_ok($cube, $package, 'isa');
 
-use Games::RubiksCube::Renderer::Simple;
+use Games::CuboidPuzzle::Renderer::Simple;
 
-my $renderer = Games::RubiksCube::Renderer::Simple->new;
+my $renderer = Games::CuboidPuzzle::Renderer::Simple->new;
 my $got = $renderer->render($cube);
 $wanted = <<'EOF';
       G G G 

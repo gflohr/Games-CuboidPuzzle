@@ -1,12 +1,12 @@
 =head1 NAME 
 
-Games::RubiksCube::Renderer::Simple - Simple renderer for cubes
+Games::CuboidPuzzle::Renderer::Simple - Simple renderer for cubes
 
 =head1 SYNOPSIS
 
-    use Games::RubiksCube::Renderer::Simple;
+    use Games::CuboidPuzzle::Renderer::Simple;
 
-    $renderer = Games::RubiksCube::Renderer::Simple->new;
+    $renderer = Games::CuboidPuzzle::Renderer::Simple->new;
     print $renderer->render($cube, %args);
 
 =head1 DESCRIPTION
@@ -69,4 +69,4 @@ Copyright (C) 2022 Guido Flohr <guido.flohr@cantanea.com>.
 
 =head1 SEE ALSO
 
-L<Games::RubiksCube::Renderer>, L<Games::RubiksCube>, perl(1)
+L<Games::CuboidPuzzle::Renderer>, L<Games::CuboidPuzzle>, perl(1)
