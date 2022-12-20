@@ -13,6 +13,12 @@ Cube
 
 Work in progress.
 
+=head1 IMPORTANT
+
+The origin of this file is a POD document.  The conversion from POD to HTML
+that is used by github.com has flaws.  Please read this file with the command
+`perldoc lib/Games/CuboidPuzzle.pod`!
+
 =head1 DESCRIPTION
 
 B<Games::CuboidPuzzle> is a Perl library that can represent any legal (and
@@ -164,7 +170,7 @@ Direction-wise it follows the front layer.
      E-E-E+
      . . .
 
-Direction-wise it follows the front layer.
+Direction-wise it follows the bottom (D) layer.
 
 =head2 Faces and Slices
 
