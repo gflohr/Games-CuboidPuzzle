@@ -55,7 +55,7 @@ B stands for blue, R for red, and Y for yellow.  The opposite side of blue
 is green (G), the opposite side of yellow is white (W), and the opposite side
 of red is orange (O).
 
-The axes are in the conventional orientation:
+The axes are in the (mathematically) conventional orientation:
 
    z|
     |  y
@@ -272,26 +272,33 @@ question is one or three cubelets wide.
 
 =head3 Faces, Slices, and Turns
 
+I<Important>: The internal notation of B<Games::CuboidPuzzle> does not even
+try to be compatible to any other notation.  Its sole purpose is to be
+consistent, universally usable, and easy to understand for programmers.
+In the future, there will be translation modules that are able to translate
+from internal notation to other, conventional notations.
+
 The internal notation, that is always valid, identifies
 the plane by the coordinate that is constant.  For example, the plane
 3z is the plane where all cubelets have the z-coordinate 3:
 
+            ^
            /y
      ^   @ @ @ 
     z| @ @ @:
     3|@ @ @::
     2|.....:
     1|.....
-     +---------x
-      1 2 3
+     +--------->
+      1 2 3   x
 
 Turns must always be around the corresponding axis in clock-wise direction and
 are identified by the name of the layer followed by the number of 90 degrees
-turns to make (between 1 and 3).  The conventional turn C<F> translates to C<1y1>
-in internal notation.  And C<3x3> is C<R'> in conventional notation.
+turns to make (between 1 and 3).  The conventional 3x3 turn C<F> translates to
+C<1y1> in internal notation.  And C<3x3> is C<R'> in conventional notation.
 
 For turning multiple layers, the width of the layers has to be inserted right
-after the axis.  For example, the move C<3x21> is C<r> in conventional
+after the axis.  For example, the move C<3x21> is C<r> in conventional 
 notation. The C<3x> denotes the layer where all cubelets have the x-coordinate
 3, the following 2 means that two layers are turned at once, and the final 1
 denotes that the layers are turned once in clock-wise direction.
