@@ -79,8 +79,7 @@ sub new {
 sub __setupMoves {
 	my ($self) = @_;
 
-	my @layers = qw(x y z);
-	$self->{__moves} = [[], [], []];
+	$self->{__shifts} = [[], [], []];
 
 	$self->__setupXMoves;
 }
@@ -88,7 +87,7 @@ sub __setupMoves {
 sub __setupXMoves {
 	my ($self) = @_;
 
-	my $moves = $self->{__move}->[0];
+	my $layer_index = 0;
 
 	my $xw = $self->{__xwidth};
 	my $yw = $self->{__ywidth};
@@ -136,17 +135,20 @@ sub __setupXMoves {
 
 		my @from;
 		foreach my $cycle (@cycles) {
-			push @from, $cycle->[0];
+			push @from, @$cycle;
 		}
-		$moves->[0] = \@from;
+		$self->{__shifts}->[$layer_index]->[$x + 1]->[0] = \@from;
 		foreach my $turns (1 .. 3) {
 			next if $turns != 2 && !$single_turns;
 
 			my @to;
 			foreach my $cycle (@cycles) {
-				push @to, $cycle->[$turns];
+				foreach my $i (0 .. 3) {
+					push @to, $cycle->[($i + $turns) & 0x3];
+				}
 			}
-			$moves->[$x + 1] = \@to;
+
+			$self->{__shifts}->[$layer_index]->[$x + 1]->[$turns] = \@to;
 		}
 	}
 
@@ -259,6 +261,45 @@ sub state { @{shift->{__state}} }
 
 sub move {
 	my ($self, $move) = @_;
+
+	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([123])$/) {
+		require Carp;
+		Carp::croak(__x("invalid move '{move}'", move => $move));
+	}
+
+	my ($coord, $layer, $turns) = ($1, $2, $3);
+	$layer = lc $layer;
+	if ('x' eq $layer) {
+		if ($coord > $self->{__xwidth}) {
+			require Carp;
+			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+				coord => $coord, to => $self->{__xwidth}));
+		}
+	} elsif ('y' eq $layer) {
+		if ($coord > $self->{__ywidth}) {
+			require Carp;
+			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+				coord => $coord, to => $self->{__ywidth}));
+		}
+	} else {
+		if ($coord > $self->{__zwidth}) {
+			require Carp;
+			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+				coord => $coord, to => $self->{__zwidth}));
+		}
+	}
+
+	return $self->fastMove($coord, (ord $layer) - (ord 'x'), $turns);
+}
+
+sub fastMove {
+	my ($self, $coord, $layer, $turns) = @_;
+
+	my $shifts = $self->{__shifts}->[$layer]->[$coord];
+	my ($from, $to) = @{$shifts}[0, $turns];
+
+	my $state = $self->{__state};
+	@{$state}[@$from] = @{$state}[@$to];
 
 	return $self;
 }
