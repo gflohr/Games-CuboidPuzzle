@@ -30,6 +30,8 @@ sub new {
 	my ($class, %args) = @_;
 
 	my $self = {};
+	bless $self, $class;
+
 	foreach my $key (keys %defaults) {
 		$self->{'__' . $key} = $args{$key} // $defaults{$key};
 	}
@@ -57,8 +59,6 @@ sub new {
 		}
 	}
 
-	bless $self, $class;
-
 	$self->__setup if !exists $self->{__state};
 
 	my $num_stickers = (
@@ -71,7 +71,116 @@ sub new {
 			wanted => $num_stickers, got => scalar @{$self->{__state}}));
 	}
 
+	$self->__setupMoves;
+
 	return $self;
+}
+
+sub __setupMoves {
+	my ($self) = @_;
+
+	my @layers = qw(x y z);
+	$self->{__moves} = [[], [], []];
+
+	$self->__setupXMoves;
+}
+
+sub __setupXMoves {
+	my ($self) = @_;
+
+	my $moves = $self->{__move}->[0];
+
+	my $xw = $self->{__xwidth};
+	my $yw = $self->{__ywidth};
+	my $zw = $self->{__zwidth};
+
+	my $single_turns = $yw == $zw;
+	foreach my $x (0 .. $xw - 1) {
+		my @cycles;
+		foreach my $z (0 .. $zw - 1) {
+			# Each cycle consists of 4 elements.  If single turns are not
+			# possible, elements #1 and #3 are invalid but unused.
+			my @cycle = ($x + $z * $xw);
+			push @cycle, $xw * $zw + $z * 2 * ($zw + $xw) + $zw + $x;
+			push @cycle, $xw * $zw + $yw * 2 * ($zw + $xw) + $z * $xw + $x;
+			push @cycle, $xw * $zw + ($yw - $z) * 2 * ($zw + $xw) - $x - 1;
+			push @cycles, \@cycle;
+		}
+		if ($x == 0) {
+			# Rotate adjacent layer next to origin.
+			my @layer;
+			my $offset = $xw * $zw;
+			foreach my $y1 (0 .. $yw - 1) {
+				my @row;
+				foreach my $x1 (0 .. $zw - 1) {
+					push @row, $offset + $y1 * 2 * ($zw + $xw) + $x1;
+				}
+				push @layer, \@row;
+			}
+			push @cycles, $self->__rotateLayer(\@layer);
+		} elsif ($x == $xw - 1) {
+			# Rotate adjacent layer far from origin.
+			my @layer;
+			my $offset = $xw * $zw + $zw + $xw;
+			foreach my $y1 (0 .. $yw - 1) {
+				my @row;
+				foreach my $x1 (0 .. $zw - 1) {
+					# We use the reverse order for the rows so that we need
+					# just one layer cycling algorithm.
+					unshift @row, $offset + $y1 * 2 * ($zw + $xw) + $x1;
+				}
+				push @layer, \@row;
+			}
+			push @cycles, $self->__rotateLayer(\@layer);			
+		}
+
+		foreach my $turns (1 .. 3) {
+			next if $turns != 2 && !$single_turns;
+
+			my (@from, @to);
+			foreach my $cycle (@cycles) {
+				push @from, $cycle->[0];
+				push @to, $cycle->[$turns];
+			}
+			$moves->[$x + 1] = [\@from, \@to];
+		}
+	}
+
+	return $self;
+}
+
+sub __rotateLayer {
+	my ($self, $layer) = @_;
+
+	my $max_row = @{$layer} - 1;
+	my $max_col = @{$layer->[0]} - 1;
+
+	my @cycles;
+	my $has_centre = $max_row == $max_col && !($max_row & 1);
+	foreach my $rowno (0 .. $max_row) {
+		foreach my $colno (0 .. $max_col) {
+			next if $has_centre && $rowno == $max_row >> 1 && $rowno == $colno;
+			next if !defined $layer->[$rowno]->[$colno];
+			my @cycle;
+			push @cycle, $layer->[$rowno]->[$colno];
+			undef $layer->[$rowno]->[$colno];
+			if ($max_row == $max_col) {
+				push @cycle, $layer->[$colno]->[$max_col - $rowno];
+				undef $layer->[$colno]->[$max_col - $rowno];
+			} else {
+				push @cycle, undef;
+			}
+			push @cycle, $layer->[$max_row - $rowno]->[$max_col - $colno];
+			undef $layer->[$max_row - $rowno]->[$max_col - $colno];
+			if ($max_row == $max_col) {
+				push @cycle, $layer->[$max_row - $colno]->[$rowno];
+				undef $layer->[$max_row - $colno]->[$rowno];
+			}
+			push @cycles, \@cycle;
+		}
+	}
+
+	return @cycles;
 }
 
 sub __setup {
