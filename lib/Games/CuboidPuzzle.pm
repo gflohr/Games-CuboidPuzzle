@@ -134,15 +134,19 @@ sub __setupXMoves {
 			push @cycles, $self->__rotateLayer(\@layer);			
 		}
 
+		my @from;
+		foreach my $cycle (@cycles) {
+			push @from, $cycle->[0];
+		}
+		$moves->[0] = \@from;
 		foreach my $turns (1 .. 3) {
 			next if $turns != 2 && !$single_turns;
 
-			my (@from, @to);
+			my @to;
 			foreach my $cycle (@cycles) {
-				push @from, $cycle->[0];
 				push @to, $cycle->[$turns];
 			}
-			$moves->[$x + 1] = [\@from, \@to];
+			$moves->[$x + 1] = \@to;
 		}
 	}
 
