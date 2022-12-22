@@ -299,7 +299,7 @@ sub fastMove {
 	my ($from, $to) = @{$shifts}[0, $turns];
 
 	my $state = $self->{__state};
-	@{$state}[@$from] = @{$state}[@$to];
+	@{$state}[@$to] = @{$state}[@$from];
 
 	return $self;
 }
