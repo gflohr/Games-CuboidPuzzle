@@ -130,7 +130,7 @@ sub __setupXMoves {
 				}
 				push @layer, \@row;
 			}
-			push @cycles, $self->__rotateLayer(\@layer);			
+			push @cycles, $self->__rotateLayer(\@layer);
 		}
 
 		my @from;
@@ -302,6 +302,37 @@ sub fastMove {
 	@{$state}[@$to] = @{$state}[@$from];
 
 	return $self;
+}
+
+sub layerIndices {
+	my ($self, $i) = @_;
+
+	my $xw = $self->xwidth;
+	my $yw = $self->ywidth;
+	my $zw = $self->zwidth;
+
+	my @rows;
+	my @subs = (
+		sub {
+			$i = 0;
+			foreach my $rowno (0 .. $zw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $xw - 1) {
+					push @cols, $i++;
+				}
+				push @rows, \@cols;
+			}
+
+			return \@rows;
+		}
+	);
+
+	if ($i > $#subs) {
+		require Carp;
+		Carp::croak(__"layer index {i} is out of range", i => $i);
+	}
+
+	return $subs[$i]->();
 }
 
 1;
