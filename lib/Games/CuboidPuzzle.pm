@@ -35,6 +35,7 @@ sub new {
 	foreach my $key (keys %defaults) {
 		$self->{'__' . $key} = $args{$key} // $defaults{$key};
 	}
+	$self->{__state} = $args{state} if $args{state};
 
 	if (@{$self->{__colors}} != 6) {
 		require Carp;
@@ -82,6 +83,7 @@ sub __setupMoves {
 	$self->{__shifts} = [[], [], []];
 
 	$self->__setupXMoves;
+	$self->__setupYMoves;
 	$self->__setupZMoves;
 }
 
@@ -156,6 +158,57 @@ sub __setupXMoves {
 	return $self;
 }
 
+sub __setupYMoves {
+	my ($self) = @_;
+
+	my $layer_index = 1;
+
+	my $xw = $self->{__xwidth};
+	my $yw = $self->{__ywidth};
+	my $zw = $self->{__zwidth};
+
+	my ($l0, $l1, $l2, $l3, $l4, $l5) =
+		map { $self->layerIndices($_) } (0 .. 5);
+	my $single_turns = $yw == $zw;
+	foreach my $y (0 .. $yw - 1) {
+		my @cycles;
+		foreach my $z (0 .. $zw - 1) {
+			# Each cycle consists of 4 elements.  If single turns are not
+			# possible, elements #1 and #3 are invalid but unused.
+			my @cycle = ($l3->[$yw - $y - 1]->[$z]);
+			push @cycle, $l2->[$yw - $y - 1]->[$z];
+			push @cycle, $l1->[$yw - $y - 1]->[$z];
+			push @cycle, $l4->[$yw - $y - 1]->[$z];
+			push @cycles, \@cycle;
+		}
+		if ($y == 0) {
+			push @cycles, $self->__rotateLayer($l5, 0);
+		} elsif ($y == $zw - 1) {
+			push @cycles, $self->__rotateLayer($l0, 0);
+		}
+
+		my @from;
+		foreach my $cycle (@cycles) {
+			push @from, @$cycle;
+		}
+		$self->{__shifts}->[$layer_index]->[$y + 1]->[0] = \@from;
+		foreach my $turns (1 .. 3) {
+			next if $turns != 2 && !$single_turns;
+
+			my @to;
+			foreach my $cycle (@cycles) {
+				foreach my $i (0 .. 3) {
+					push @to, $cycle->[($i + $turns) & 0x3];
+				}
+			}
+
+			$self->{__shifts}->[$layer_index]->[$y + 1]->[$turns] = \@to;
+		}
+	}
+
+	return $self;
+}
+
 sub __setupZMoves {
 	my ($self) = @_;
 
@@ -207,8 +260,15 @@ sub __setupZMoves {
 	return $self;
 }
 
+# This method is destructive!
 sub __rotateLayer {
 	my ($self, $layer, $ccw) = @_;
+
+	if ($ccw) {
+		foreach my $row (@$layer) {
+			@$row = reverse @$row;
+		}
+	}
 
 	my $max_row = @{$layer} - 1;
 	my $max_col = @{$layer->[0]} - 1;
