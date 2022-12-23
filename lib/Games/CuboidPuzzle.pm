@@ -23,7 +23,7 @@ my %defaults = (
 	xwidth => 3,
 	ywidth => 3,
 	zwidth => 3,
-	colors => [qw(G O W R Y B)],
+	colors => [qw(B O Y R W G)],
 );
 
 sub new {
@@ -82,6 +82,7 @@ sub __setupMoves {
 	$self->{__shifts} = [[], [], []];
 
 	$self->__setupXMoves;
+	$self->__setupZMoves;
 }
 
 sub __setupXMoves {
@@ -155,8 +156,59 @@ sub __setupXMoves {
 	return $self;
 }
 
+sub __setupZMoves {
+	my ($self) = @_;
+
+	my $layer_index = 2;
+
+	my $xw = $self->{__xwidth};
+	my $yw = $self->{__ywidth};
+	my $zw = $self->{__zwidth};
+
+	my ($l0, $l1, $l2, $l3, $l4, $l5) =
+		map { $self->layerIndices($_) } (0 .. 5);
+	my $single_turns = $xw == $yw;
+	foreach my $z (0 .. $zw - 1) {
+		my @cycles;
+		foreach my $x (0 .. $xw - 1) {
+			# Each cycle consists of 4 elements.  If single turns are not
+			# possible, elements #1 and #3 are invalid but unused.
+			my @cycle = ($l0->[$zw - $z - 1]->[$x]);
+			push @cycle, $l3->[$x]->[$z];
+			push @cycle, $l5->[$z]->[$xw - $x - 1];
+			push @cycle, $l1->[$yw - $x - 1]->[$zw - $z - 1];
+			push @cycles, \@cycle;
+		}
+		if ($z == 0) {
+			push @cycles, $self->__rotateLayer($l2, 0);
+		} elsif ($z == $zw - 1) {
+			push @cycles, $self->__rotateLayer($l4, 1);
+		}
+
+		my @from;
+		foreach my $cycle (@cycles) {
+			push @from, @$cycle;
+		}
+		$self->{__shifts}->[$layer_index]->[$z + 1]->[0] = \@from;
+		foreach my $turns (1 .. 3) {
+			next if $turns != 2 && !$single_turns;
+
+			my @to;
+			foreach my $cycle (@cycles) {
+				foreach my $i (0 .. 3) {
+					push @to, $cycle->[($i + $turns) & 0x3];
+				}
+			}
+
+			$self->{__shifts}->[$layer_index]->[$z + 1]->[$turns] = \@to;
+		}
+	}
+
+	return $self;
+}
+
 sub __rotateLayer {
-	my ($self, $layer) = @_;
+	my ($self, $layer, $ccw) = @_;
 
 	my $max_row = @{$layer} - 1;
 	my $max_col = @{$layer->[0]} - 1;
@@ -307,12 +359,27 @@ sub fastMove {
 sub layerIndices {
 	my ($self, $i) = @_;
 
+	my $j = 0;
+	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+
+	if (exists $colors{$i}) {
+		$i = $colors{$i};
+	} elsif ($i !~ /^[0-5]$/) {
+		require Carp;
+		Carp::croak(__x("invalid layer id '{id}'", id => $i));
+	}
+
 	my $xw = $self->xwidth;
 	my $yw = $self->ywidth;
 	my $zw = $self->zwidth;
 
 	my @rows;
+	# The layers are:
+	#   0
+	# 1 2 3 4
+	#   5
 	my @subs = (
+		# Layer 0.
 		sub {
 			$i = 0;
 			foreach my $rowno (0 .. $zw - 1) {
@@ -322,9 +389,66 @@ sub layerIndices {
 				}
 				push @rows, \@cols;
 			}
-
-			return \@rows;
-		}
+		},
+		# Layer 1.
+		sub {
+			foreach my $rowno (0 .. $yw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $zw - 1) {
+					push @cols, $xw * $zw
+						+ $rowno * 2 * ($zw + $xw)
+						+ $colno;
+				}
+				push @rows, \@cols;
+			}
+		},
+		# Layer 2.
+		sub {
+			foreach my $rowno (0 .. $yw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $xw - 1) {
+					push @cols, $xw * $zw
+						+ $rowno * 2 * ($zw + $xw)
+						+ $zw + $colno;
+				}
+				push @rows, \@cols;
+			}
+		},
+		# Layer 3.
+		sub {
+			foreach my $rowno (0 .. $yw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $zw - 1) {
+					push @cols, $xw * $zw
+						+ $rowno * 2 * ($zw + $xw)
+						+ $zw + $xw + $colno;
+				}
+				push @rows, \@cols;
+			}
+		},
+		# Layer 4.
+		sub {
+			foreach my $rowno (0 .. $yw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $xw - 1) {
+					push @cols, $xw * $zw
+						+ $rowno * 2 * ($zw + $xw)
+						+ 2 * $zw + $xw + $colno;
+				}
+				push @rows, \@cols;
+			}
+		},
+		# Layer 5.
+		sub {
+			$i = $xw * $zw + $yw * 2 * ($zw + $xw);
+			foreach my $rowno (0 .. $zw - 1) {
+				my @cols;
+				foreach my $colno (0 .. $xw - 1) {
+					push @cols, $i++;
+				}
+				push @rows, \@cols;
+			}
+		},
 	);
 
 	if ($i > $#subs) {
@@ -332,7 +456,9 @@ sub layerIndices {
 		Carp::croak(__"layer index {i} is out of range", i => $i);
 	}
 
-	return $subs[$i]->();
+	$subs[$i]->();
+
+	return \@rows;
 }
 
 1;

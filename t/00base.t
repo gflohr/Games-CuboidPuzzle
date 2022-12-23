@@ -7,6 +7,8 @@
 # to Public License, Version 2, as published by Sam Hocevar. See
 # http://www.wtfpl.net/ for more details.
 
+use strict;
+
 use Test::More;
 
 my $package = 'Games::CuboidPuzzle';
@@ -21,16 +23,16 @@ use Games::CuboidPuzzle::Renderer::Simple;
 
 my $renderer = Games::CuboidPuzzle::Renderer::Simple->new;
 my $got = $renderer->render($cube);
-$wanted = <<'EOF';
-      G G G 
-      G G G 
-      G G G 
-O O O W W W R R R Y Y Y 
-O O O W W W R R R Y Y Y 
-O O O W W W R R R Y Y Y 
-      B B B 
-      B B B 
-      B B B 
+my $wanted = <<'EOF';
+      B B B
+      B B B
+      B B B
+O O O Y Y Y R R R W W W
+O O O Y Y Y R R R W W W
+O O O Y Y Y R R R W W W
+      G G G
+      G G G
+      G G G
 EOF
 
 is $got, $wanted, 'simple renderer';

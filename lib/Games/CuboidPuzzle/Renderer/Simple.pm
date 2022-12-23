@@ -33,7 +33,7 @@ sub render {
 		foreach my $col (0 .. $x - 1) {
 			$dump .= $state[$row * $x + $col] . ' ';
 		}
-
+		chop $dump;
 		$dump .= "\n";
 	}
 
@@ -42,7 +42,7 @@ sub render {
 		foreach my $col (0 .. 2 * ($x + $z) - 1) {
 			$dump .= $state[$x * $z + 2 * $row * ($x + $z) + $col] . ' ';
 		}
-
+		chop $dump;
 		$dump .= "\n";
 	}
 
@@ -52,7 +52,7 @@ sub render {
 		foreach my $col (0 .. $x - 1) {
 			$dump .= $state[$x * $z + 2 * $y * ($x + $z) + $row * $x + $col] . ' ';
 		}
-
+		chop $dump;
 		$dump .= "\n";
 	}
 

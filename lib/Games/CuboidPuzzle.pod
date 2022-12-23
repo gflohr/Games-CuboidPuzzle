@@ -1,4 +1,4 @@
-=head1 NAME 
+=head1 NAME
 
 Games::CuboidPuzzle - A Perl Representation of Cuboid Puzzles Like the Rubik's
 Cube
@@ -35,24 +35,24 @@ The cube design that the documentation is based on is as follows:
                         y
      z                /
      |     +---+---+---+
-     |    / Y / Y / Y /|
+     |    / W / W / W /|
      |   +---+---+---+R|
-     |  / Y / Y / Y /| +
+     |  / W / W / W /| +
      | +---+---+---+R|/|
-     |/ Y / Y / Y /| +R|
+     |/ W / W / W /| +R|
      +---+---+---+R|/| +
-     | B | B | B | +R|/|
+     | G | G | G | +R|/|
      |   |   |   |/| +R|
      +---+---+---+R|/| +
-     | B | B | B | +R|/
+     | G | G | G | +R|/
      |   |   |   |/| +
      +---+---+---+R|/
-     | B | B | B | +
+     | G | G | G | +
      |   |   |   |/
      +---+---+---+.......x
 
-B stands for blue, R for red, and Y for yellow.  The opposite side of blue
-is green (G), the opposite side of yellow is white (W), and the opposite side
+G stands for green, R for red, and W for white.  The opposite side of green
+is blue (B), the opposite side of white is yellow (Y), and the opposite side
 of red is orange (O).
 
 The axes are in the (mathematically) conventional orientation:
@@ -66,15 +66,15 @@ The axes are in the (mathematically) conventional orientation:
 Less challenging for ASCII art is this representation, where the cube is
 unfolded:
 
-          G G G
-          G G G
-          G G G
-    O O O W W W R R R Y Y Y
-    O O O W W W R R R Y Y Y
-    O O O W W W R R R Y Y Y
           B B B
           B B B
           B B B
+    O O O Y Y Y R R R W W W
+    O O O Y Y Y R R R W W W
+    O O O Y Y Y R R R W W W
+          G G G
+          G G G
+          G G G
 
 =head2 Outer Planes (Faces) and Moves Notation
 
@@ -235,24 +235,23 @@ The number of cubelets on the z-axis, defaults to 3.
 =item B<colors>
 
 A reference to an array of 6 characters that denote the colors of the
-cube, defaults to C<['G', 'O', 'W', 'R', 'Y', 'B']> for the default cube design
-(green, orange, white, red, yellow, blue):
+cube, defaults to C<['B', 'O', 'Y', 'R', 'W', 'G']> for the default cube design
+(blue, orange, yellow, red, white, green):
 
-
-          G G G
-          G G G
-          G G G
-    O O O W W W R R R Y Y Y
-    O O O W W W R R R Y Y Y
-    O O O W W W R R R Y Y Y
           B B B
           B B B
           B B B
+    O O O Y Y Y R R R W W W
+    O O O Y Y Y R R R W W W
+    O O O Y Y Y R R R W W W
+          G G G
+          G G G
+          G G G
 
-This represents a standard cube where front face F is blue, and the upside
-face U is yellow.  The blue face is folded towards you, the green one away
-from you, the orange one to the left, and the yellow and red faces are peeled
-of to the right.
+This represents a standard cube where the front face F is green, and the upside
+face U is white.  The green face is folded towards you, the blue one away
+from you, the orange one to the left, and the white and red faces are peeled
+off to the right.
 
 =back
 
@@ -273,18 +272,19 @@ question is one or three cubelets wide.
 =head3 Faces, Slices, and Turns
 
 I<Important>: The internal notation of B<Games::CuboidPuzzle> does not even
-try to be compatible to any other notation.  Its sole purpose is to be
-consistent, universally usable, and easy to understand for programmers.
-In the future, there will be translation modules that are able to translate
-from internal notation to other, conventional notations.
+try to be compatible to any other notation, not even the one described above.
+Its sole purpose is to be consistent, universally usable, and easy to
+understand for programmers.  In the future, there will be translation modules
+that are able to translate from the internal notation to other, conventional
+notations.
 
-The internal notation, that is always valid, identifies
-the plane by the coordinate that is constant.  For example, the plane
-3z is the plane where all cubelets have the z-coordinate 3:
+The internal notation, that is always valid, identifies the plane by the
+coordinate that is constant.  For example, the plane 3z is the plane where all
+cubelets have the z-coordinate 3:
 
             ^
            /y
-     ^   @ @ @ 
+     ^   @ @ @
     z| @ @ @:
     3|@ @ @::
     2|.....:
@@ -294,14 +294,22 @@ the plane by the coordinate that is constant.  For example, the plane
 
 Turns must always be around the corresponding axis in clock-wise direction and
 are identified by the name of the layer followed by the number of 90 degrees
-turns to make (between 1 and 3).  The conventional 3x3 turn C<F> translates to
-C<1y1> in internal notation.  And C<3x3> is C<R'> in conventional notation.
+turns to make (between 1 and 3).  Unlike the conventional notation, the notion
+of "clock-wise" for parallel layers and slices is always the same, looking
+along the positive part of the axis to the origin.  That means that for the
+internal notation you can "look through" the cube and see all layers.
+
+The conventional 3x3 turn C<B> translates to C<1y1> in internal notation.
+And C<3x3> is C<R'> in conventional notation.
 
 For turning multiple layers, the width of the layers has to be inserted right
-after the axis.  For example, the move C<3x21> is C<r> in conventional 
+after the axis.  For example, the move C<3x21> is C<r> in conventional
 notation. The C<3x> denotes the layer where all cubelets have the x-coordinate
 3, the following 2 means that two layers are turned at once, and the final 1
 denotes that the layers are turned once in clock-wise direction.
+
+For a 60x60x60 cube, where you turn the 42 rightmost layers twice in clock-wise
+direction, the internal notation would be C<60x422>.
 
 =head3 Cube Rotations
 
@@ -318,13 +326,13 @@ sticker.
 Example: We take a cube with 4 cubelets in x-direction, 3 in y-direction, and
 2 in z-direction.  Unfolded it would look like this (with standard colors)
 
-        G G G G
-        G G G G
-    O O W W W W R R Y Y Y Y
-    O O W W W W R R Y Y Y Y
-    O O W W W W R R Y Y Y Y
         B B B B
         B B B B
+    O O Y Y Y Y R R W W W W
+    O O Y Y Y Y R R W W W W
+    O O Y Y Y Y R R W W W W
+        G G G G
+        G G G G
 
 The array indices of the stickers would be:
 
