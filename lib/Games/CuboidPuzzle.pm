@@ -96,44 +96,24 @@ sub __setupXMoves {
 	my $yw = $self->{__ywidth};
 	my $zw = $self->{__zwidth};
 
+	my ($l0, $l1, $l2, $l3, $l4, $l5) =
+		map { $self->layerIndices($_) } (0 .. 5);
 	my $single_turns = $yw == $zw;
 	foreach my $x (0 .. $xw - 1) {
 		my @cycles;
 		foreach my $z (0 .. $zw - 1) {
 			# Each cycle consists of 4 elements.  If single turns are not
 			# possible, elements #1 and #3 are invalid but unused.
-			my @cycle = ($x + $z * $xw);
-			push @cycle, $xw * $zw + $z * 2 * ($zw + $xw) + $zw + $x;
-			push @cycle, $xw * $zw + $yw * 2 * ($zw + $xw) + $z * $xw + $x;
-			push @cycle, $xw * $zw + ($yw - $z) * 2 * ($zw + $xw) - $x - 1;
+			my @cycle = ($l0->[$z]->[$x]);
+			push @cycle, $l2->[$z]->[$x];
+			push @cycle, $l5->[$z]->[$x];
+			push @cycle, $l4->[$yw - $z - 1]->[$xw - $x - 1];
 			push @cycles, \@cycle;
 		}
 		if ($x == 0) {
-			# Rotate adjacent layer next to origin.
-			my @layer;
-			my $offset = $xw * $zw;
-			foreach my $y1 (0 .. $yw - 1) {
-				my @row;
-				foreach my $x1 (0 .. $zw - 1) {
-					push @row, $offset + $y1 * 2 * ($zw + $xw) + $x1;
-				}
-				push @layer, \@row;
-			}
-			push @cycles, $self->__rotateLayer(\@layer);
+			push @cycles, $self->__rotateLayer($l1, 0);
 		} elsif ($x == $xw - 1) {
-			# Rotate adjacent layer far from origin.
-			my @layer;
-			my $offset = $xw * $zw + $zw + $xw;
-			foreach my $y1 (0 .. $yw - 1) {
-				my @row;
-				foreach my $x1 (0 .. $zw - 1) {
-					# We use the reverse order for the rows so that we need
-					# just one layer cycling algorithm.
-					unshift @row, $offset + $y1 * 2 * ($zw + $xw) + $x1;
-				}
-				push @layer, \@row;
-			}
-			push @cycles, $self->__rotateLayer(\@layer);
+			push @cycles, $self->__rotateLayer($l3, 1);
 		}
 
 		my @from;
@@ -169,7 +149,7 @@ sub __setupYMoves {
 
 	my ($l0, $l1, $l2, $l3, $l4, $l5) =
 		map { $self->layerIndices($_) } (0 .. 5);
-	my $single_turns = $yw == $zw;
+	my $single_turns = $xw == $zw;
 	foreach my $y (0 .. $yw - 1) {
 		my @cycles;
 		foreach my $z (0 .. $zw - 1) {
