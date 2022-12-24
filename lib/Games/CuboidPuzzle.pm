@@ -18,6 +18,7 @@ use strict;
 use v5.10;
 
 use Locale::TextDomain qw(1.32);
+use POSIX qw(ceil);
 
 my %defaults = (
 	xwidth => 3,
@@ -101,38 +102,41 @@ sub __setupXMoves {
 	my $single_turns = $yw == $zw;
 	foreach my $x (0 .. $xw - 1) {
 		my @cycles;
-		foreach my $z (0 .. $zw - 1) {
-			# Each cycle consists of 4 elements.  If single turns are not
-			# possible, elements #1 and #3 are invalid but unused.
-			my @cycle = ($l0->[$z]->[$x]);
-			push @cycle, $l2->[$z]->[$x];
-			push @cycle, $l5->[$z]->[$x];
-			push @cycle, $l4->[$yw - $z - 1]->[$xw - $x - 1];
-			push @cycles, \@cycle;
-		}
-		if ($x == 0) {
-			push @cycles, $self->__rotateLayer($l1, 0);
-		} elsif ($x == $xw - 1) {
-			push @cycles, $self->__rotateLayer($l3, 1);
-		}
-
-		my @from;
-		foreach my $cycle (@cycles) {
-			push @from, @$cycle;
-		}
-		$self->{__shifts}->[$layer_index]->[$x + 1]->[0] = \@from;
-		foreach my $turns (1 .. 3) {
-			next if $turns != 2 && !$single_turns;
-
-			my @to;
-			foreach my $cycle (@cycles) {
-				foreach my $i (0 .. 3) {
-					push @to, $cycle->[($i + $turns) & 0x3];
-				}
+		if ($single_turns) {
+			foreach my $z (0 .. $zw - 1) {
+				push @cycles, [
+					$l0->[$z]->[$x],
+					$l2->[$z]->[$x],
+					$l5->[$z]->[$x],
+					$l4->[$yw - $z - 1]->[$xw - $x - 1]
+				];
 			}
-
-			$self->{__shifts}->[$layer_index]->[$x + 1]->[$turns] = \@to;
+			if ($x == 0) {
+				push @cycles, $self->__rotateLayer($l1, 0);
+			} elsif ($x == $xw - 1) {
+				push @cycles, $self->__rotateLayer($l3, 1);
+			}
+		} else {
+			foreach my $z (0 .. $zw - 1) {
+				push @cycles, [
+					$l0->[$z]->[$x],
+					$l5->[$z]->[$x],
+				];
+			}
+			foreach my $y (0 .. $yw - 1) {
+				push @cycles, [
+					$l2->[$x]->[$y],
+					$l4->[$xw - $x - 1]->[$yw - $y - 1],
+				];
+			}
+			if ($x == 0) {
+				push @cycles, $self->__transposeLayer($l1);
+			} elsif ($x == $xw - 1) {
+				push @cycles, $self->__transposeLayer($l3);
+			}
 		}
+
+		$self->__fillShifts($layer_index, $x, @cycles);
 	}
 
 	return $self;
@@ -152,38 +156,41 @@ sub __setupYMoves {
 	my $single_turns = $xw == $zw;
 	foreach my $y (0 .. $yw - 1) {
 		my @cycles;
-		foreach my $z (0 .. $zw - 1) {
-			# Each cycle consists of 4 elements.  If single turns are not
-			# possible, elements #1 and #3 are invalid but unused.
-			my @cycle = ($l3->[$yw - $y - 1]->[$z]);
-			push @cycle, $l2->[$yw - $y - 1]->[$z];
-			push @cycle, $l1->[$yw - $y - 1]->[$z];
-			push @cycle, $l4->[$yw - $y - 1]->[$z];
-			push @cycles, \@cycle;
-		}
-		if ($y == 0) {
-			push @cycles, $self->__rotateLayer($l5, 0);
-		} elsif ($y == $zw - 1) {
-			push @cycles, $self->__rotateLayer($l0, 0);
-		}
-
-		my @from;
-		foreach my $cycle (@cycles) {
-			push @from, @$cycle;
-		}
-		$self->{__shifts}->[$layer_index]->[$y + 1]->[0] = \@from;
-		foreach my $turns (1 .. 3) {
-			next if $turns != 2 && !$single_turns;
-
-			my @to;
-			foreach my $cycle (@cycles) {
-				foreach my $i (0 .. 3) {
-					push @to, $cycle->[($i + $turns) & 0x3];
-				}
+		if ($single_turns) {
+			foreach my $z (0 .. $zw - 1) {
+				push @cycles, [
+					$l3->[$yw - $y - 1]->[$z],
+					$l2->[$yw - $y - 1]->[$z],
+					$l1->[$yw - $y - 1]->[$z],
+					$l4->[$yw - $y - 1]->[$z]
+				];
 			}
-
-			$self->{__shifts}->[$layer_index]->[$y + 1]->[$turns] = \@to;
+			if ($y == 0) {
+				push @cycles, $self->__rotateLayer($l5, 0);
+			} elsif ($y == $zw - 1) {
+				push @cycles, $self->__rotateLayer($l0, 0);
+			}
+		} else {
+			foreach my $z (0 .. $zw - 1) {
+				push @cycles, [
+					$l3->[$yw - $y - 1]->[$z],
+					$l1->[$yw - $y - 1]->[$z],
+				];
+			}
+			foreach my $x (0 .. $xw - 1) {
+				push @cycles, [
+					$l2->[$y]->[$x],
+					$l4->[$y]->[$x],
+				];
+			}
+			if ($y == 0) {
+				push @cycles, $self->__transposeLayer($l5);
+			} elsif ($y == $zw - 1) {
+				push @cycles, $self->__transposeLayer($l0);
+			}
 		}
+
+		$self->__fillShifts($layer_index, $y, @cycles);
 	}
 
 	return $self;
@@ -203,44 +210,68 @@ sub __setupZMoves {
 	my $single_turns = $xw == $yw;
 	foreach my $z (0 .. $zw - 1) {
 		my @cycles;
-		foreach my $x (0 .. $xw - 1) {
-			# Each cycle consists of 4 elements.  If single turns are not
-			# possible, elements #1 and #3 are invalid but unused.
-			my @cycle = ($l0->[$zw - $z - 1]->[$x]);
-			push @cycle, $l3->[$x]->[$z];
-			push @cycle, $l5->[$z]->[$xw - $x - 1];
-			push @cycle, $l1->[$yw - $x - 1]->[$zw - $z - 1];
-			push @cycles, \@cycle;
-		}
-		if ($z == 0) {
-			push @cycles, $self->__rotateLayer($l2, 0);
-		} elsif ($z == $zw - 1) {
-			push @cycles, $self->__rotateLayer($l4, 1);
-		}
-
-		my @from;
-		foreach my $cycle (@cycles) {
-			push @from, @$cycle;
-		}
-		$self->{__shifts}->[$layer_index]->[$z + 1]->[0] = \@from;
-		foreach my $turns (1 .. 3) {
-			next if $turns != 2 && !$single_turns;
-
-			my @to;
-			foreach my $cycle (@cycles) {
-				foreach my $i (0 .. 3) {
-					push @to, $cycle->[($i + $turns) & 0x3];
-				}
+		if ($single_turns) {
+			foreach my $x (0 .. $xw - 1) {
+				push @cycles, [
+					$l0->[$zw - $z - 1]->[$x],
+					$l3->[$x]->[$z],
+					$l5->[$z]->[$xw - $x - 1],
+					$l1->[$yw - $x - 1]->[$zw - $z - 1]
+				];
 			}
-
-			$self->{__shifts}->[$layer_index]->[$z + 1]->[$turns] = \@to;
+			if ($z == 0) {
+				push @cycles, $self->__rotateLayer($l2, 0);
+			} elsif ($z == $zw - 1) {
+				push @cycles, $self->__rotateLayer($l4, 1);
+			}
+		} else {
+			foreach my $x (0 .. $xw - 1) {
+				push @cycles, [
+					$l0->[$zw - $z - 1]->[$x],
+					$l5->[$z]->[$xw - $x - 1]
+				];
+			}
+			foreach my $y (0 .. $yw - 1) {
+				push @cycles, [
+					$l3->[$y]->[$z],
+					$l1->[$y]->[$z],
+				];
+			}
+			if ($z == 0) {
+				push @cycles, $self->__transposeLayer($l2);
+			} elsif ($z == $zw - 1) {
+				push @cycles, $self->__transposeLayer($l4);
+			}
 		}
+
+		$self->__fillShifts($layer_index, $z, @cycles);
 	}
 
 	return $self;
 }
 
-# This method is destructive!
+sub __fillShifts {
+	my ($self, $layer_index, $coord, @cycles) = @_;
+
+	my @from;
+	foreach my $cycle (@cycles) {
+		push @from, @$cycle;
+	}
+
+	$self->{__shifts}->[$layer_index]->[$coord + 1]->[0] = \@from;
+	my @turns = (4 == @{$cycles[0]}) ? (1 .. 3) : (2);
+	foreach my $turns (@turns) {
+		my @to;
+		foreach my $cycle (@cycles) {
+			push @$cycle, shift @$cycle;
+			push @to, @$cycle;
+		}
+		$self->{__shifts}->[$layer_index]->[$coord + 1]->[$turns] = \@to;
+	}
+
+	return $self;
+}
+
 sub __rotateLayer {
 	my ($self, $layer, $ccw) = @_;
 
@@ -250,31 +281,40 @@ sub __rotateLayer {
 		}
 	}
 
-	my $max_row = @{$layer} - 1;
-	my $max_col = @{$layer->[0]} - 1;
+	my $centre = ceil $#$layer / 2;
+	my $max = $#$layer;
 
 	my @cycles;
-	my $has_centre = $max_row == $max_col && !($max_row & 1);
-	foreach my $rowno (0 .. $max_row) {
-		foreach my $colno (0 .. $max_col) {
-			next if $has_centre && $rowno == $max_row >> 1 && $rowno == $colno;
-			next if !defined $layer->[$rowno]->[$colno];
-			my @cycle;
-			push @cycle, $layer->[$rowno]->[$colno];
-			undef $layer->[$rowno]->[$colno];
-			if ($max_row == $max_col) {
-				push @cycle, $layer->[$colno]->[$max_col - $rowno];
-				undef $layer->[$colno]->[$max_col - $rowno];
-			} else {
-				push @cycle, undef;
-			}
-			push @cycle, $layer->[$max_row - $rowno]->[$max_col - $colno];
-			undef $layer->[$max_row - $rowno]->[$max_col - $colno];
-			if ($max_row == $max_col) {
-				push @cycle, $layer->[$max_row - $colno]->[$rowno];
-				undef $layer->[$max_row - $colno]->[$rowno];
-			}
-			push @cycles, \@cycle;
+	foreach my $depth (0 .. $centre) {
+		my $end = $max - $depth;
+		last if $end == $depth;
+		foreach my $x ($depth .. $max - $depth - 1) {
+			push @cycles, [
+				$layer->[$depth]->[$x],
+				$layer->[$x]->[$end],
+				$layer->[$end]->[$end - $x + $depth],
+				$layer->[$end - $x + $depth]->[$depth],
+			];
+		}
+	}
+
+	return @cycles;
+}
+
+sub __transposeLayer {
+	my ($self, $layer) = @_;
+
+	my @cycles;
+	my $rows = @$layer;
+	my $cols = @{$layer->[0]};
+	my $last = ($rows * $cols) >> 1;
+	CYCLE: foreach my $row (0 .. $rows - 1) {
+		foreach my $col (0 .. $cols - 1) {
+			last CYCLE if $row * $cols + $col >= $last;
+			push @cycles, [
+				$layer->[$row]->[$col],
+				$layer->[$rows - $row - 1]->[$cols - $col - 1]
+			];
 		}
 	}
 
@@ -381,7 +421,11 @@ sub move {
 		}
 	}
 
-	return $self->fastMove($coord, (ord $layer) - (ord 'x'), $turns);
+	if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), $turns)) {
+		require Carp;
+		Carp::croak(__x("this cube does not support the move '{move}'",
+			move => $move));
+	}
 }
 
 sub fastMove {
@@ -389,6 +433,8 @@ sub fastMove {
 
 	my $shifts = $self->{__shifts}->[$layer]->[$coord];
 	my ($from, $to) = @{$shifts}[0, $turns];
+
+	return if !defined $to;
 
 	my $state = $self->{__state};
 	@{$state}[@$to] = @{$state}[@$from];
