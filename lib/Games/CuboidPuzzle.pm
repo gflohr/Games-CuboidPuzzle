@@ -234,7 +234,7 @@ sub __setupZMoves {
 			foreach my $y (0 .. $yw - 1) {
 				push @cycles, [
 					$l3->[$y]->[$z],
-					$l1->[$y]->[$z],
+					$l1->[$yw - $y - 1]->[$zw - $z - 1],
 				];
 			}
 			if ($z == 0) {

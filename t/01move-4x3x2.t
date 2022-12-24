@@ -117,3 +117,19 @@ K L M N O P Q R S T U V
 W X Y Z a b c d e f g h
     i j k l
     m n o p
+# 1z2
+    0 1 2 3
+    l k j i
+8 c b a Z Y X F G H I J
+K Q P O N M L R S T U V
+W E D C B A 9 d e f g h
+    7 6 5 4
+    m n o p
+# 2z2
+    p o n m
+    4 5 6 7
+d 9 A B C D E W h g f e
+R L M N O P Q K V U T S
+F X Y Z a b c 8 J I H G
+    i j k l
+    3 2 1 0
