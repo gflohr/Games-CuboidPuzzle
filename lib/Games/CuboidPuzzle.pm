@@ -108,7 +108,7 @@ sub __setupXMoves {
 					$l0->[$z]->[$x],
 					$l2->[$z]->[$x],
 					$l5->[$z]->[$x],
-					$l4->[$yw - $z - 1]->[$xw - $x - 1]
+					$l4->[$zw - $z - 1]->[$xw - $x - 1]
 				];
 			}
 			if ($x == 0) {
@@ -125,8 +125,8 @@ sub __setupXMoves {
 			}
 			foreach my $y (0 .. $yw - 1) {
 				push @cycles, [
-					$l2->[$x]->[$y],
-					$l4->[$xw - $x - 1]->[$yw - $y - 1],
+					$l2->[$y]->[$x],
+					$l4->[$yw - $y - 1]->[$xw - $x - 1],
 				];
 			}
 			if ($x == 0) {

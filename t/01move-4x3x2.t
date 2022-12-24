@@ -69,3 +69,27 @@ L K V N O P Q R S T U M
 9 8 J Z a b c d e f g A
     0 j k l
     4 n o p
+# 2x2
+    0 j 2 3
+    4 n 6 7
+8 9 A g C D E F G H Z J
+K L M U O P Q R S T N V
+W X Y I a b c d e f B h
+    i 1 k l
+    m 5 o p
+# 3x2
+    0 1 k 3
+    4 5 o 7
+8 9 A B f D E F G a I J
+K L M N T P Q R S O U V
+W X Y Z H b c d e C g h
+    i j 2 l
+    m n 6 p
+# 4x2
+    0 1 2 l
+    4 5 6 p
+8 9 A B C e d c b H I J
+K L M N O S R Q P T U V
+W X Y Z a G F E D f g h
+    i j k 3
+    m n o 7
