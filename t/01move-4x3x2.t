@@ -93,3 +93,27 @@ K L M N O S R Q P T U V
 W X Y Z a G F E D f g h
     i j k 3
     m n o 7
+# 1y2
+    0 1 2 3
+    4 5 6 7
+8 9 A B C D E F G H I J
+K L M N O P Q R S T U V
+c d e f g h W X Y Z a b
+    p o n m
+    l k j i
+# 2y2
+    0 1 2 3
+    4 5 6 7
+8 9 A B C D E F G H I J
+Q R S T U V K L M N O P
+W X Y Z a b c d e f g h
+    i j k l
+    m n o p
+# 3y2
+    7 6 5 4
+    3 2 1 0
+E F G H I J 8 9 A B C D
+K L M N O P Q R S T U V
+W X Y Z a b c d e f g h
+    i j k l
+    m n o p

@@ -167,7 +167,7 @@ sub __setupYMoves {
 			}
 			if ($y == 0) {
 				push @cycles, $self->__rotateLayer($l5, 0);
-			} elsif ($y == $zw - 1) {
+			} elsif ($y == $yw - 1) {
 				push @cycles, $self->__rotateLayer($l0, 0);
 			}
 		} else {
@@ -179,13 +179,13 @@ sub __setupYMoves {
 			}
 			foreach my $x (0 .. $xw - 1) {
 				push @cycles, [
-					$l2->[$y]->[$x],
-					$l4->[$y]->[$x],
+					$l2->[$yw - $y - 1]->[$x],
+					$l4->[$yw - $y - 1]->[$x],
 				];
 			}
 			if ($y == 0) {
 				push @cycles, $self->__transposeLayer($l5);
-			} elsif ($y == $zw - 1) {
+			} elsif ($y == $yw - 1) {
 				push @cycles, $self->__transposeLayer($l0);
 			}
 		}
