@@ -592,6 +592,8 @@ sub layerIndices {
 	return \@rows;
 }
 
+# If MOVE is applied to the cube, what would be the equivalent move of
+# ROTATION is applied first?
 sub rotateMove {
 	my ($self, $move, $rotation) = @_;
 
@@ -600,6 +602,7 @@ sub rotateMove {
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
+	$move_layer = lc $move_layer;
 
 	if ($rotation !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
 		require Carp;
@@ -611,17 +614,54 @@ sub rotateMove {
 		Carp::croak(__x("rotation '{rotation}' is not a rotation move",
 			rotation => $rotation));
 	}
+	$rot_layer eq lc $rot_layer;
 
-	my ($coord, $layer, $turns);
-	if ($rot_layer eq $move_layer) {
-		$coord = $move_coord;
-		$layer = $move_layer;
-		$turns = $move_turns;
-	} else {
-		$coord = 3;
-		$layer = 'z';
-		$turns = $move_turns;
+	return $move if $rot_layer eq $move_layer;
+
+	my $layer = "xyz";
+	$layer =~ s/$move_layer//;
+	$layer =~ s/$rot_layer//;
+	my $width = $self->{"__${layer}width"};
+
+	if ($rot_turns == 2) {
+		my $turns = 4 - $move_turns;
+		my $coord = $width + 1 - $move_coord;
+		return "$coord$move_layer$turns";
 	}
+
+	# The key is the roation axis, the inner key the layer that moves.
+	# Do the coordinate or the number of turns change if we rotate by
+	# 90 degrees in clock-wise direction?
+	my %transform = (
+		x => {
+			y => {
+				coord => 1,
+			},
+			z => {
+				turns => 1,
+			}
+		},
+		y => {
+			x => {
+				coord => 1,
+				turns => 1,
+			},
+			z => {
+			}
+		},
+		z => {
+			x => {
+				coord => 1,
+			},
+			y => {
+				turns => 3,
+			},
+		}
+	);
+	my ($coord, $turns);
+	my $transformer = $transform{$rot_layer}->{$move_layer};
+	my $coord = $transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
+	my $turns = $transformer->{turns} ? 4 - $move_turns : $move_turns;
 
 	return "$coord$layer$move_width$turns";
 }

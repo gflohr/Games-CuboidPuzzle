@@ -22,38 +22,28 @@ my %tests = (
 		'1x1' => '1x1',
 		'1x2' => '1x2',
 		'1x3' => '1x3',
-		'1y1' => '1z1',
-		'1y2' => '1z2',
-		'1y3' => '1z3',
-		#'1z1' => '1y3',
-		'2x1' => '2x1',
-		'2x2' => '2x2',
-		'2x3' => '2x3',
-		'3x1' => '3x1',
-		'3x2' => '3x2',
-		'3x3' => '3x3',
+		'1y1' => '3z1',
+		'1y2' => '3z2',
+		'1y3' => '3z3',
+		'1z1' => '1y3',
+		'1z2' => '1y2',
+		'1z3' => '1y1',
 	},
-	'0x2' => {
-		'1x1' => '1x1',
-		'1x2' => '1x2',
-		'1x3' => '1x3',
-		'2x1' => '2x1',
-		'2x2' => '2x2',
-		'2x3' => '2x3',
-		'3x1' => '3x1',
-		'3x2' => '3x2',
-		'3x3' => '3x3',
+	'0y1' => {
+		'1x1' => '3z3',
+		'1x2' => '3z2',
+		'1x3' => '3z1',
+		'1y1' => '1y1',
+		'1y2' => '1y2',
+		'1y3' => '1y3',
+		'1z1' => '1x1'
 	},
-	'0x3' => {
-		'1x1' => '1x1',
-		'1x2' => '1x2',
-		'1x3' => '1x3',
-		'2x1' => '2x1',
-		'2x2' => '2x2',
-		'2x3' => '2x3',
-		'3x1' => '3x1',
-		'3x2' => '3x2',
-		'3x3' => '3x3',
+	'0z1' => {
+		'3x1' => '1y1',
+		'1y1' => '1x3',
+	},
+	'0z2' => {
+		'1x1' => '3x3'
 	},
 );
 
@@ -63,6 +53,8 @@ foreach my $rotation (sort keys %tests) {
 			state => [@state],
 		);
 		my $rotated_move = $rotated_mover->rotateMove($move, $rotation);
+		is $rotated_move, $tests{$rotation}->{$move},
+			"$move after $rotation == $rotated_move";
 		$rotated_mover->move($rotation);
 		$rotated_mover->move($rotated_move);
 		my $opposite_rotation = $rotation;
@@ -74,7 +66,7 @@ foreach my $rotation (sort keys %tests) {
 		$single_mover->move($move);
 		my $got = "\n" . $single_mover->render;
 		my $wanted = "\n" . $rotated_mover->render;
-		is $got, $wanted, "$move after $rotation == $rotated_move";
+		is $got, $wanted, "$move after $rotation vs $rotated_move";
 	}
 }
 
