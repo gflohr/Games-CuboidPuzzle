@@ -21,6 +21,7 @@ use Locale::TextDomain qw(1.32);
 use POSIX qw(ceil);
 
 use Games::CuboidPuzzle::Renderer::Simple;
+use Games::CuboidPuzzle::MoveTranslator::WCA;
 
 my %defaults = (
 	xwidth => 3,
@@ -28,6 +29,7 @@ my %defaults = (
 	zwidth => 3,
 	colors => [qw(B O Y R W G)],
 	renderer => Games::CuboidPuzzle::Renderer::Simple->new,
+	translator => Games::CuboidPuzzle::MoveTranslator::WCA->new,
 );
 
 sub new {
