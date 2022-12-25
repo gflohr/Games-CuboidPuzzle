@@ -599,18 +599,18 @@ sub layerIndices {
 sub rotateMove {
 	my ($self, $move, $rotation) = @_;
 
-	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseMove($move);
+	if (!defined $move) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
-	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
-	$move_layer = lc $move_layer;
 
-	if ($rotation !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseMove($rotation);
+	if (!defined $rotation) {
 		require Carp;
 		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
 	}
-	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = ($1, $2, $3, $4);
+
 	if ($rot_coord != 0) {
 		require Carp;
 		Carp::croak(__x("rotation '{rotation}' is not a rotation move",
@@ -669,6 +669,9 @@ sub rotateMove {
 		$coord = !$transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
 		$turns = !$transformer->{turns} ? 4 - $move_turns : $move_turns;
 	}
+
+	$move_width = '' if 1 == $move_width;
+
 	return "$coord$layer$move_width$turns";
 }
 
@@ -681,10 +684,8 @@ sub render {
 sub parseMove {
 	my (undef, $move) = @_;
 
-	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
-		require Carp;
-		Carp::croak(__x("invalid move '{move}'", move => $move));
-	}
+	return if $move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/;
+
 	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
 	$move_layer = lc $move_layer;
 
