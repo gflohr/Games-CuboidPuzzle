@@ -20,11 +20,14 @@ use v5.10;
 use Locale::TextDomain qw(1.32);
 use POSIX qw(ceil);
 
+use Games::CuboidPuzzle::Renderer::Simple;
+
 my %defaults = (
 	xwidth => 3,
 	ywidth => 3,
 	zwidth => 3,
 	colors => [qw(B O Y R W G)],
+	renderer => Games::CuboidPuzzle::Renderer::Simple->new,
 );
 
 sub new {
@@ -167,7 +170,7 @@ sub __setupYMoves {
 				];
 			}
 			if ($y == 0) {
-				push @cycles, $self->__rotateLayer($l5, 0);
+				push @cycles, $self->__rotateLayer($l5, 1);
 			} elsif ($y == $yw - 1) {
 				push @cycles, $self->__rotateLayer($l0, 0);
 			}
@@ -390,17 +393,22 @@ sub zwidth { shift->{__zwidth} }
 
 sub colors { shift->{__colors} }
 
-sub state { @{shift->{__state}} }
+sub state {
+	wantarray ? @{shift->{__state}} : join ':', @{shift->{__state} };
+}
 
 sub move {
 	my ($self, $move) = @_;
 
-	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([123])$/) {
+	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	my ($coord, $layer, $turns) = ($1, $2, $3);
+	my ($coord, $layer, $width, $turns) = ($1, $2, $3, $4);
+	$width //= 1;
+	die "wide moves not yet supported" if $width != 1;
+
 	$layer = lc $layer;
 	if ('x' eq $layer) {
 		if ($coord > $self->{__xwidth}) {
@@ -582,6 +590,46 @@ sub layerIndices {
 	$subs[$i]->();
 
 	return \@rows;
+}
+
+sub rotateMove {
+	my ($self, $move, $rotation) = @_;
+
+	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+		require Carp;
+		Carp::croak(__x("invalid move '{move}'", move => $move));
+	}
+	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
+
+	if ($rotation !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+		require Carp;
+		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
+	}
+	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = ($1, $2, $3, $4);
+	if ($rot_coord != 0) {
+		require Carp;
+		Carp::croak(__x("rotation '{rotation}' is not a rotation move",
+			rotation => $rotation));
+	}
+
+	my ($coord, $layer, $turns);
+	if ($rot_layer eq $move_layer) {
+		$coord = $move_coord;
+		$layer = $move_layer;
+		$turns = $move_turns;
+	} else {
+		$coord = 3;
+		$layer = 'z';
+		$turns = $move_turns;
+	}
+
+	return "$coord$layer$move_width$turns";
+}
+
+sub render {
+	my ($self) = @_;
+
+	return $self->{__renderer}->render($self);
 }
 
 1;

@@ -95,9 +95,9 @@ A M Y m n o e S G 5 4 3
 C D E F G H I J K 9 A B
 O P Q R S T U V W L M N
 a b c d e f g h i X Y Z
-      p m j
-      q n k
-      r o l
+      l o r
+      k n q
+      j m p
 # 0y2
       8 7 6
       5 4 3
@@ -115,9 +115,9 @@ d e f g h i X Y Z a b c
 I J K 9 A B C D E F G H
 U V W L M N O P Q R S T
 g h i X Y Z a b c d e f
-      l o r
-      k n q
-      j m p
+      p m j
+      q n k
+      r o l
 # 0z1
       X L 9
       Y M A

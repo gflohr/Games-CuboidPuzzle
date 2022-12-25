@@ -155,9 +155,9 @@ X Y Z a b r f T H 2 h i
 9 A B C D E F G H I J K
 L M N O P Q R S T U V W
 a b c d e f g h i X Y Z
-      p m j
-      q n k
-      r o l
+      l o r
+      k n q
+      j m p
 # 1y2
       0 1 2
       3 4 5
@@ -175,9 +175,9 @@ d e f g h i X Y Z a b c
 9 A B C D E F G H I J K
 L M N O P Q R S T U V W
 g h i X Y Z a b c d e f
-      l o r
-      k n q
-      j m p
+      p m j
+      q n k
+      r o l
 # 2y1
       0 1 2
       3 4 5
