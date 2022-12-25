@@ -678,4 +678,19 @@ sub render {
 	return $self->{__renderer}->render($self);
 }
 
+sub parseMove {
+	my (undef, $move) = @_;
+
+	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+		require Carp;
+		Carp::croak(__x("invalid move '{move}'", move => $move));
+	}
+	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
+	$move_layer = lc $move_layer;
+
+	$move_width //= 1;
+
+	return $move_coord, $move_layer, $move_width, $move_turns;
+}
+
 1;
