@@ -45,6 +45,9 @@ my %tests = (
 	'0z2' => {
 		'1x1' => '3x3'
 	},
+	'0z3' => {
+		'1x1' => '1y3',
+	}
 );
 
 foreach my $rotation (sort keys %tests) {

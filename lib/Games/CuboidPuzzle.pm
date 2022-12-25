@@ -660,9 +660,13 @@ sub rotateMove {
 	);
 	my ($coord, $turns);
 	my $transformer = $transform{$rot_layer}->{$move_layer};
-	my $coord = $transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
-	my $turns = $transformer->{turns} ? 4 - $move_turns : $move_turns;
-
+	if (1 == $rot_turns) {
+		$coord = $transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
+		$turns = $transformer->{turns} ? 4 - $move_turns : $move_turns;
+	} else {
+		$coord = !$transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
+		$turns = !$transformer->{turns} ? 4 - $move_turns : $move_turns;
+	}
 	return "$coord$layer$move_width$turns";
 }
 
