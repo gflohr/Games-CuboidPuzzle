@@ -86,6 +86,7 @@ sub __setupMoves {
 	$self->__setupXMoves;
 	$self->__setupYMoves;
 	$self->__setupZMoves;
+	$self->__setupRotations;
 }
 
 sub __setupXMoves {
@@ -426,6 +427,42 @@ sub move {
 		Carp::croak(__x("this cube does not support the move '{move}'",
 			move => $move));
 	}
+}
+
+sub __setupRotations {
+	my ($self) = @_;
+
+	foreach my $layer_shifts (@{$self->{__shifts}}) {
+		my @from;
+		foreach my $coords (1 .. $#$layer_shifts) {
+			my $coord_shifts = $layer_shifts->[$coords];
+			push @from, @{$coord_shifts->[0]};
+		}
+		$layer_shifts->[0]->[0] = \@from;
+
+		foreach my $turns (1 .. 3) {
+			next if !defined $layer_shifts->[1]->[$turns];
+			my @to;
+			foreach my $coords (1 .. $#$layer_shifts) {
+				my $coord_shifts = $layer_shifts->[$coords];
+				push @to, @{$coord_shifts->[$turns]};
+			}
+
+			my @to_sorted;
+			foreach my $i (0 .. $#from) {
+				my $from = $from[$i];
+				my $to = $to[$i];
+				$to_sorted[$from[$i]] = $to[$i];
+			}
+			foreach my $i (0 .. $#to_sorted) {
+				# Rotated centre?
+				$to_sorted[$i] //= $i;
+			}
+			$layer_shifts->[0]->[$turns] = \@to;
+		}
+	}
+
+	return $self;
 }
 
 sub fastMove {
