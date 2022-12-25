@@ -402,16 +402,14 @@ sub state {
 sub move {
 	my ($self, $move) = @_;
 
-	if ($move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/) {
+	my ($coord, $layer, $width, $turns) = $self->parseMove($move);
+	if (!defined $coord) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	my ($coord, $layer, $width, $turns) = ($1, $2, $3, $4);
-	$width //= 1;
 	die "wide moves not yet supported" if $width != 1;
 
-	$layer = lc $layer;
 	if ('x' eq $layer) {
 		if ($coord > $self->{__xwidth}) {
 			require Carp;
@@ -600,13 +598,13 @@ sub rotateMove {
 	my ($self, $move, $rotation) = @_;
 
 	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseMove($move);
-	if (!defined $move) {
+	if (!defined $move_coord) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
 	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseMove($rotation);
-	if (!defined $rotation) {
+	if (!defined $rot_coord) {
 		require Carp;
 		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
 	}
@@ -686,12 +684,12 @@ sub parseMove {
 
 	return if $move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/;
 
-	my ($move_coord, $move_layer, $move_width, $move_turns) = ($1, $2, $3, $4);
-	$move_layer = lc $move_layer;
+	my ($coord, $layer, $width, $turns) = ($1, $2, $3, $4);
+	$layer = lc $layer;
 
-	$move_width //= 1;
+	$width //= 1;
 
-	return $move_coord, $move_layer, $move_width, $move_turns;
+	return $coord, $layer, $width, $turns;
 }
 
 1;
