@@ -28,7 +28,10 @@ my %internal2wca = (
 my %wca_turns = (
 	L => ["'", 2, ""],
 	R => ["", 2, "'"],
-
+	F => ["", 2, "'"],
+	B => ["'", 2, ""],
+	U => ["", 2, "'"],
+	D => ["'", 2, ""],
 );
 
 sub translate {
@@ -41,19 +44,17 @@ sub translate {
 	}
 
 	my $width_method = $layer . 'width';
-	my $width = $cube->$width_method;
+	my $cube_width = $cube->$width_method;
 
 	my @wca;
 
 	if ($coord == 0) {
 		die "cube rotations not yet supported"
-	} elsif ($coord == 1) {
-		my $wca_layer = $internal2wca{$layer}->[0];
+	} elsif ($coord == 1 || $coord == $cube_width) {
+		my $wca_layer = $internal2wca{$layer}->[$coord == $cube_width];
 		my $wca_move = $wca_layer . $wca_turns{$wca_layer}->[$turns - 1];
-		push @wca, $wca_move;
-	} elsif ($coord == $width) {
-		my $wca_layer = $internal2wca{$layer}->[1];
-		my $wca_move = $wca_layer . $wca_turns{$wca_layer}->[$turns - 1];
+		$wca_move .= 'w' if $width > 1;
+		$wca_move = $width . $wca_move if $width > 2;
 		push @wca, $wca_move;
 	} else {
 		die "inner block moves not yet supported";
