@@ -29,6 +29,23 @@ sub translate {
 		if ($moves[0] =~ /^([LRFBUD])(.*)w$/) {
 			$moves[0] = lc $1 . $2;
 		}
+	} elsif (3 == $cube->xwidth
+	         && 3 == $cube->ywidth
+			 && 3 == $cube->zwidth
+			 && $move =~ /^2[xyz][123]$/i) {
+		my %slice_mappings = (
+			'2x1' => "M'",
+			'2x2' => "M2",
+			'2x3' => "M",
+			'2y1' => "S",
+			'2y2' => "S2",
+			'2y3' => "S'",
+			'2z1' => "E'",
+			'2z2' => "E2",
+			'2z3' => "E",
+		);
+		$move = lc $move;
+		@moves = ("$slice_mappings{$move}");
 	}
 
 	return @moves;
