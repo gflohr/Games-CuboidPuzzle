@@ -38,18 +38,17 @@ sub parse {
 		"'" => 3,
 	);
 	my $turns = $dir2turns{$direction};
-	$turns = 4 - $turns if $face =~ /^L$/;
+	$turns = 4 - $turns if $face =~ /^[LBD]$/;
 	my %face2coord = (
 		L => '1x',
 		R => $cube->xwidth . 'x',
 		F => '1y',
 		B => $cube->ywidth . 'y',
-		U => '1z',
-		D => $cube->ywidth . 'z',
+		U => $cube->ywidth . 'z',
+		D => '1z',
 	);
 	my $position = $face2coord{$face};
 	if ($width != '' && $position =~ /^([1-9][0-9]*)([xyz])$/ && $1 != 1) {
-		$DB::single = 1;
 		my $coord = $1 - $width + 1;
 		$position = "$coord$2";
 	}
