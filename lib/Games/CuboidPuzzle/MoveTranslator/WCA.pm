@@ -48,7 +48,7 @@ my %wca_turns = (
 
 sub translate {
 	# FIXME! The cube should be injected.
-	my (undef, $move, $cube) = @_;
+	my ($self, $move, $cube) = @_;
 
 	my ($coord, $layer, $width, $turns) = Games::CuboidPuzzle->parseMove($move);
 	if (!defined $coord) {
@@ -64,17 +64,57 @@ sub translate {
 		# Normalize move.
 		$move = "0$layer$turns";
 		push @wca, $internal2wca_rotation{$move};
-	} elsif ($coord == 1 || $coord == $cube_width) {
-		my $wca_layer = $internal2wca{$layer}->[$coord == $cube_width];
+	} elsif ($coord == 1 || $coord + $width - 1 == $cube_width) {
+		my $wca_layer = $internal2wca{$layer}->[$coord != 1];
 		my $wca_move = $wca_layer . $wca_turns{$wca_layer}->[$turns - 1];
 		$wca_move .= 'w' if $width > 1;
 		$wca_move = $width . $wca_move if $width > 2;
 		push @wca, $wca_move;
 	} else {
-		die "inner block moves not yet supported";
+		# Inner block moves have to be split up into two moves.  And there are
+		# always two possibilities to do that.  We pick the option where less
+		# layers have to be turned.  Let's take the move 3x41 on a 9x9x9 cube
+		# as an example.  We make one turn at x = 3 around the x-axis turning
+		# 4 layers:
+		#
+		# x: 1 2 3 4 5 6 7 8 9
+		#        X X X X
+		#
+		# We can now either move 6L'w 2Lw or 7Rw 3R'w.  The first option turns
+		# less layers and that is because the block of layers moved is closer
+		# to the origin of the coordinate system, then the outer bounds, in
+		# other words:
+		my ($coord1, $coord2, $width1, $width2);
+		if ($coord - 1 < ($cube_width - ($coord + $width - 1))) {
+			$coord1 = $coord2 = 1;
+			$width1 = $coord + $width - 1;
+			$width2 = $coord - 1;
+		} else {
+			$coord1 = $coord;
+			$width1 = $cube_width - $coord + 1;
+			$coord2 = $coord + $width;
+			$width2 = ($cube_width - ($coord + $width - 1));
+		}
+		my $turns2 = 4 - $turns;
+		push @wca,
+			$self->translate("$coord1$layer$width1$turns", $cube),
+			$self->translate("$coord2$layer$width2$turns2", $cube);
 	}
 
 	return @wca;
 }
 
 1;
+
+__END__
+
+x = 6
+w = 4
+c = 6 / 2 + (6 - 4 + 1) / 2
+  = (6 + (6 - 4 + 1)) / 2
+  = (6 + 6 - 4 + 1) / 2
+  = (2 * 6 - 4 + 1) / 2
+  = (2 * x - w + 1) / 2
+1 2 3 4 5 6 7 8 9
+    X X X X
+

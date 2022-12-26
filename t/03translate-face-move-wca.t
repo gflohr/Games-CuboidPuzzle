@@ -16,7 +16,7 @@ use List::Util qw(pairs);
 use Games::CuboidPuzzle;
 use Games::CuboidPuzzle::MoveTranslator::WCA;
 
-my %face_tests = (
+my %tests = (
 	'1x1' => "L'",
 	'1x2' => "L2",
 	'1x3' => "L",
@@ -26,15 +26,6 @@ my %face_tests = (
 	'1x31' => "3L'w",
 	'1x32' => "3L2w",
 	'1x33' => "3Lw",
-	'4x1' => "R",
-	'4x2' => "R2",
-	'4x3' => "R'",
-	'4x21' => "Rw",
-	'4x22' => "R2w",
-	'4x23' => "R'w",
-	'4x31' => "3Rw",
-	'4x32' => "3R2w",
-	'4x33' => "3R'w",
 	'1y1' => "F",
 	'1y2' => "F2",
 	'1y3' => "F'",
@@ -44,15 +35,6 @@ my %face_tests = (
 	'1y31' => "3Fw",
 	'1y32' => "3F2w",
 	'1y33' => "3F'w",
-	'4y1' => "B'",
-	'4y2' => "B2",
-	'4y3' => "B",
-	'4y21' => "B'w",
-	'4y22' => "B2w",
-	'4y23' => "Bw",
-	'4y31' => "3B'w",
-	'4y32' => "3B2w",
-	'4y33' => "3Bw",
 	'1z1' => "D'",
 	'1z2' => "D2",
 	'1z3' => "D",
@@ -62,15 +44,33 @@ my %face_tests = (
 	'1z31' => "3D'w",
 	'1z32' => "3D2w",
 	'1z33' => "3Dw",
+	'4x1' => "R",
+	'4x2' => "R2",
+	'4x3' => "R'",
+	'3x21' => "Rw",
+	'3x22' => "R2w",
+	'3x23' => "R'w",
+	'2x31' => "3Rw",
+	'2x32' => "3R2w",
+	'2x33' => "3R'w",
+	'4y1' => "B'",
+	'4y2' => "B2",
+	'4y3' => "B",
+	'3y21' => "B'w",
+	'3y22' => "B2w",
+	'3y23' => "Bw",
+	'2y31' => "3B'w",
+	'2y32' => "3B2w",
+	'2y33' => "3Bw",
 	'4z1' => "U",
 	'4z2' => "U2",
 	'4z3' => "U'",
-	'4z21' => "Uw",
-	'4z22' => "U2w",
-	'4z23' => "U'w",
-	'4z31' => "3Uw",
-	'4z32' => "3U2w",
-	'4z33' => "3U'w",
+	'3z21' => "Uw",
+	'3z22' => "U2w",
+	'3z23' => "U'w",
+	'2z31' => "3Uw",
+	'2z32' => "3U2w",
+	'2z33' => "3U'w",
 );
 
 my $cube = Games::CuboidPuzzle->new(
@@ -79,10 +79,10 @@ my $cube = Games::CuboidPuzzle->new(
 	zwidth => 4,
 );
 
-foreach my $move (sort keys %face_tests) {
+foreach my $move (sort keys %tests) {
 	my @got = Games::CuboidPuzzle::MoveTranslator::WCA->translate($move, $cube);
-	is scalar @got, 1, "$face_tests{$move} triggered multiple moves";
-	is $got[0], $face_tests{$move}, "$move eq $face_tests{$move}";
+	is scalar @got, 1, "$move triggered multiple moves";
+	is $got[0], $tests{$move}, "$move eq $tests{$move}";
 }
 
 done_testing;
