@@ -44,11 +44,17 @@ sub parse {
 		R => $cube->xwidth . 'x',
 		F => '1y',
 		B => $cube->ywidth . 'y',
-		U => '3z',
+		U => '1z',
 		D => $cube->ywidth . 'z',
 	);
+	my $position = $face2coord{$face};
+	if ($width != '' && $position =~ /^([1-9][0-9]*)([xyz])$/ && $1 != 1) {
+		$DB::single = 1;
+		my $coord = $1 - $width + 1;
+		$position = "$coord$2";
+	}
 
-	return "$face2coord{$face}$width$turns";
+	return "$position$width$turns";
 }
 
 1;

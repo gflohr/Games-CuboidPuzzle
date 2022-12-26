@@ -23,6 +23,12 @@ my %tests = (
 	"L'" => '1x1',
 	"L'w" => '1x21',
 	"3L'w" => '1x31',
+	"R" => '4x1',
+	"Rw" => '3x21',
+	"3Rw" => '2x31',
+	"R'" => '4x3',
+	"R'w" => '3x23',
+	"3R'w" => '2x33',
 );
 
 my $cube = Games::CuboidPuzzle->new(
