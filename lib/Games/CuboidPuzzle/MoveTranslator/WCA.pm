@@ -25,6 +25,18 @@ my %internal2wca = (
 	z => [qw[D U]],
 );
 
+my %internal2wca_rotation = (
+	'0x1' => "x",
+	'0x2' => "x2",
+	'0x3' => "x'",
+	'0y1' => "z",
+	'0y2' => "z2",
+	'0y3' => "z'",
+	'0z1' => "y",
+	'0z2' => "y",
+	'0z3' => "y'",
+);
+
 my %wca_turns = (
 	L => ["'", 2, ""],
 	R => ["", 2, "'"],
@@ -49,7 +61,9 @@ sub translate {
 	my @wca;
 
 	if ($coord == 0) {
-		die "cube rotations not yet supported"
+		# Normalize move.
+		$move = "0$layer$turns";
+		push @wca, $internal2wca_rotation{$move};
 	} elsif ($coord == 1 || $coord == $cube_width) {
 		my $wca_layer = $internal2wca{$layer}->[$coord == $cube_width];
 		my $wca_move = $wca_layer . $wca_turns{$wca_layer}->[$turns - 1];
