@@ -14,63 +14,46 @@ use Test::More;
 use List::Util qw(pairs);
 
 use Games::CuboidPuzzle;
-use Games::CuboidPuzzle::MoveParser::WCA;
+use Games::CuboidPuzzle::MoveParser::Conventional;
 
 my %tests = (
+	# All WCA moves must also work.
 	"L" => '1x3',
 	"Lw" => '1x23',
-	"3Lw" => '1x33',
 	"L2" => '1x2',
 	"L2w" => '1x22',
-	"3L2w" => '1x32',
 	"L'" => '1x1',
 	"L'w" => '1x21',
-	"3L'w" => '1x31',
-	"R" => '4x1',
-	"Rw" => '3x21',
-	"3Rw" => '2x31',
-	"R2" => '4x2',
-	"R2w" => '3x22',
-	"3R2w" => '2x32',
-	"R'" => '4x3',
-	"R'w" => '3x23',
-	"3R'w" => '2x33',
+	"R" => '3x1',
+	"Rw" => '2x21',
+	"R2" => '3x2',
+	"R2w" => '2x22',
+	"R'" => '3x3',
+	"R'w" => '2x23',
 	"F" => '1y1',
 	"Fw" => '1y21',
-	"3Fw" => '1y31',
 	"F2" => '1y2',
 	"F2w" => '1y22',
-	"3F2w" => '1y32',
 	"F'" => '1y3',
 	"F'w" => '1y23',
-	"3F'w" => '1y33',
-	"B" => '4y3',
-	"Bw" => '3y23',
-	"3Bw" => '2y33',
-	"B2" => '4y2',
-	"B2w" => '3y22',
-	"3B2w" => '2y32',
-	"B'" => '4y1',
-	"B'w" => '3y21',
-	"3B'w" => '2y31',
-	"U" => '4z1',
-	"Uw" => '3z21',
-	"3Uw" => '2z31',
-	"U2" => '4z2',
-	"U2w" => '3z22',
-	"3U2w" => '2z32',
-	"U'" => '4z3',
-	"U'w" => '3z23',
-	"3U'w" => '2z33',
+	"B" => '3y3',
+	"Bw" => '2y23',
+	"B2" => '3y2',
+	"B2w" => '2y22',
+	"B'" => '3y1',
+	"B'w" => '2y21',
+	"U" => '3z1',
+	"Uw" => '2z21',
+	"U2" => '3z2',
+	"U2w" => '2z22',
+	"U'" => '3z3',
+	"U'w" => '2z23',
 	"D" => '1z3',
 	"Dw" => '1z23',
-	"3Dw" => '1z33',
 	"D2" => '1z2',
 	"D2w" => '1z22',
-	"3D2w" => '1z32',
 	"D'" => '1z1',
 	"D'w" => '1z21',
-	"3D'w" => '1z31',
 	"x" => '0x1',
 	"x2" => '0x2',
 	"x'" => '0x3',
@@ -82,14 +65,11 @@ my %tests = (
 	"y'" => '0z3',
 );
 
-my $cube = Games::CuboidPuzzle->new(
-	xwidth => 4,
-	ywidth => 4,
-	zwidth => 4,
-);
+my $cube = Games::CuboidPuzzle->new;
 
+ok 1;
 foreach my $move (sort keys %tests) {
-	my @got = Games::CuboidPuzzle::MoveParser::WCA->parse($move, $cube);
+	my @got = Games::CuboidPuzzle::MoveParser::Conventional->parse($move, $cube);
 	is scalar @got, 1, "$move triggered multiple moves";
 	is $got[0], $tests{$move}, "$move eq $tests{$move}";
 }
