@@ -17,6 +17,24 @@ use Games::CuboidPuzzle;
 use Games::CuboidPuzzle::MoveParser::Conventional;
 
 my %tests = (
+	"l" => '1x23',
+	"r" => '2x21',
+	"f" => '1y21',
+	"b" => '2y23',
+	"u" => '2z21',
+	"d" => '1z23',
+	"l2" => '1x22',
+	"r2" => '2x22',
+	"f2" => '1y22',
+	"b2" => '2y22',
+	"u2" => '2z22',
+	"d2" => '1z22',
+	"l'" => '1x21',
+	"r'" => '2x23',
+	"f'" => '1y23',
+	"b'" => '2y21',
+	"u'" => '2z23',
+	"d'" => '1z21',
 	# All WCA moves must also work.
 	"L" => '1x3',
 	"Lw" => '1x23',

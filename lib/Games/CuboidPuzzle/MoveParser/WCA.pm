@@ -14,7 +14,7 @@ package Games::CuboidPuzzle::MoveParser::WCA;
 use strict;
 use v5.10;
 
-use base qw(Games::CuboidPuzzle::MoveTranslator);
+use base qw(Games::CuboidPuzzle::MoveParser);
 
 use Locale::TextDomain qw(1.32);
 use Games::CuboidPuzzle;

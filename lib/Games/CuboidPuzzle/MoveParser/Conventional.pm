@@ -14,61 +14,30 @@ package Games::CuboidPuzzle::MoveParser::Conventional;
 use strict;
 use v5.10;
 
-use base qw(Games::CuboidPuzzle::MoveTranslator);
+use base qw(Games::CuboidPuzzle::MoveParser::WCA);
 
 use Locale::TextDomain qw(1.32);
 use Games::CuboidPuzzle;
 
 sub parse {
-	my ($self, $move, $cube) = @_;
+	my ($self, $original, $cube) = @_;
 
-	if ($move =~ /^([xyz])([2'])?$/i) {
-		my %rotations = (
-			"x" => '0x1',
-			"x2" => '0x2',
-			"x'" => '0x3',
-			"z" => '0y1',
-			"z2" => '0y2',
-			"z'" => '0y3',
-			"y" => '0z1',
-			"y2" => '0z2',
-			"y'" => '0z3',
-		);
-		return $rotations{$move};
+	my $translated;
+	my $move;
+	if ($original =~ /^([lrfbud])([2'])?$/) {
+		my $face = uc $1;
+		$move = $face . $2 . 'w';
+	} else {
+		$move = $original;
 	}
 
-	if ($move !~ /^([1-9][0-9]*)?([LRFBUD])([2'])?(w)?$/) {
+	my $translated = eval { $self->SUPER::parse($move, $cube) };
+	if ($@) {
 		require Carp;
-		Carp::croak(__x("invalid WCA move '{move}'", move => $move));
-	}
-	my ($width, $face, $direction, $wide_flag) = ($1, $2, $3, $4);
-	if (!defined $width) {
-		$width = $wide_flag ? 2 : 1;
-	}
-	$width = $width == 1 ? '' : $width;
-	$direction //= '';
-	my %dir2turns = (
-		'' => 1,
-		2 => 2,
-		"'" => 3,
-	);
-	my $turns = $dir2turns{$direction};
-	$turns = 4 - $turns if $face =~ /^[LBD]$/;
-	my %face2coord = (
-		L => '1x',
-		R => $cube->xwidth . 'x',
-		F => '1y',
-		B => $cube->ywidth . 'y',
-		U => $cube->ywidth . 'z',
-		D => '1z',
-	);
-	my $position = $face2coord{$face};
-	if ($width != '' && $position =~ /^([1-9][0-9]*)([xyz])$/ && $1 != 1) {
-		my $coord = $1 - $width + 1;
-		$position = "$coord$2";
+		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	return "$position$width$turns";
+	return $translated;
 }
 
 1;
