@@ -24,9 +24,25 @@ sub parse {
 
 	my $translated;
 	my $move;
+	my %slice_moves = (
+		"M" => '2x3',
+		"M2" => '2x2',
+		"M'" => '2x1',
+		"S" => '2y1',
+		"S2" => '2y2',
+		"S3" => '2y3',
+		"E" => '2z3',
+		"E2" => '2z2',
+		"E'" => '2z1',
+	);
 	if ($original =~ /^([lrfbud])([2'])?$/) {
 		my $face = uc $1;
 		$move = $face . $2 . 'w';
+	} elsif (exists $slice_moves{$original}
+	         && 3 == $cube->xwidth
+	         && 3 == $cube->ywidth
+	         && 3 == $cube->zwidth) {
+		return $slice_moves{$original};
 	} else {
 		$move = $original;
 	}
