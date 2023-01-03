@@ -490,6 +490,9 @@ sub fastMove {
 sub layerIndices {
 	my ($self, $i) = @_;
 
+	# FIXME! The tables should be pre-calculated for performance reasons!
+	# FIXME! There should be a "flat" version that returns a flat list instead
+	# an array of an array.
 	my $j = 0;
 	my %colors = map { $_ => $j++ } @{$self->{__colors}};
 
@@ -690,6 +693,16 @@ sub parseMove {
 	$width //= 1;
 
 	return $coord, $layer, $width, $turns;
+}
+
+sub conditionSolved {
+	my ($self, $layer_id) = @_;
+
+	my ($from, $to) = defined $layer_id ? ($layer_id, $layer_id) : (0 .. 5);
+	foreach my $i ($from .. $to) {
+	}
+
+	return $self;
 }
 
 1;
