@@ -9,13 +9,23 @@
 # to Public License, Version 2, as published by Sam Hocevar. See
 # http://www.wtfpl.net/ for more details.
 
-package Games::CuboidPuzzle::MoveParser;
+package Games::CuboidPuzzle::Notation::Internal;
 
 use strict;
 use v5.10;
 
-sub new {
-	bless {}, shift;
+use base qw(Games::CuboidPuzzle::Notation);
+
+sub parse {
+	my ($self, $original, $cube) = @_;
+
+	return $original;
+}
+
+sub translate {
+	my ($self, $move) = @_;
+
+	return $move;
 }
 
 1;

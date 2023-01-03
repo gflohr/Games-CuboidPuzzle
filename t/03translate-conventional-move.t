@@ -14,7 +14,7 @@ use Test::More;
 use List::Util qw(pairs);
 
 use Games::CuboidPuzzle;
-use Games::CuboidPuzzle::MoveTranslator::Conventional;
+use Games::CuboidPuzzle::Notation::Conventional;
 
 my %tests = (
 	'1x21' => "l'",
@@ -40,7 +40,7 @@ my %tests = (
 my $cube = Games::CuboidPuzzle->new;
 
 foreach my $move (sort keys %tests) {
-	my @got = Games::CuboidPuzzle::MoveTranslator::Conventional->translate($move, $cube);
+	my @got = Games::CuboidPuzzle::Notation::Conventional->translate($move, $cube);
 	is scalar @got, 1, "$move triggered multiple moves";
 	is $got[0], $tests{$move}, "$move eq $tests{$move}";
 }

@@ -9,7 +9,7 @@
 # to Public License, Version 2, as published by Sam Hocevar. See
 # http://www.wtfpl.net/ for more details.
 
-package Games::CuboidPuzzle::MoveTranslator;
+package Games::CuboidPuzzle::Notation;
 
 use strict;
 use v5.10;

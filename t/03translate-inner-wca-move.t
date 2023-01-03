@@ -14,7 +14,7 @@ use Test::More;
 use List::Util qw(pairs);
 
 use Games::CuboidPuzzle;
-use Games::CuboidPuzzle::MoveTranslator::WCA;
+use Games::CuboidPuzzle::Notation::WCA;
 
 my %tests = (
 	'2x1' => ["L'w", "L"],
@@ -28,7 +28,7 @@ my $cube = Games::CuboidPuzzle->new(
 );
 
 foreach my $move (sort keys %tests) {
-	my @got = Games::CuboidPuzzle::MoveTranslator::WCA->translate($move, $cube);
+	my @got = Games::CuboidPuzzle::Notation::WCA->translate($move, $cube);
 	is scalar @got, 2, "$move triggered not exactly two moves";
 	is $got[0], $tests{$move}->[0], "$move 1 eq $tests{$move}->[0]";
 	is $got[1], $tests{$move}->[1], "$move 1 eq $tests{$move}->[1]";

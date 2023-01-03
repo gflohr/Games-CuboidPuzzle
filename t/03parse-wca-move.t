@@ -14,7 +14,7 @@ use Test::More;
 use List::Util qw(pairs);
 
 use Games::CuboidPuzzle;
-use Games::CuboidPuzzle::MoveParser::WCA;
+use Games::CuboidPuzzle::Notation::WCA;
 
 my %tests = (
 	"L" => '1x3',
@@ -89,7 +89,7 @@ my $cube = Games::CuboidPuzzle->new(
 );
 
 foreach my $move (sort keys %tests) {
-	my @got = Games::CuboidPuzzle::MoveParser::WCA->parse($move, $cube);
+	my @got = Games::CuboidPuzzle::Notation::WCA->parse($move, $cube);
 	is scalar @got, 1, "$move triggered multiple moves";
 	is $got[0], $tests{$move}, "$move eq $tests{$move}";
 }
