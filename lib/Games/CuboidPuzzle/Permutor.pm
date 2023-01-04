@@ -48,14 +48,14 @@ sub __doPermute {
 	foreach my $move (keys %{$self->{__supported}}) {
 		my ($coord, $layer, $turns) = @{$self->{__supported}->{$move}};
 
-		$cube->fastMove($coord, $layer, $turns);
+		$cube->fastMove($coord, $layer, 1, $turns);
 
 		if ($depth == $max_depth) {
 			$callback->();
 		} else {
 			$self->__doPermute($depth + 1, $max_depth, $callback);
 		}
-		$cube->fastMove($coord, $layer, 4 - $turns);
+		$cube->fastMove($coord, $layer, 1, 4 - $turns);
 	}
 
 	return $self;

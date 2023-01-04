@@ -458,7 +458,7 @@ sub move {
 			}
 		}
 
-		if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), $turns)) {
+		if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), 1, $turns)) {
 			require Carp;
 			Carp::croak(__x("this cube does not support the move '{move}'",
 				move => $move));
@@ -505,7 +505,9 @@ sub __setupRotations {
 }
 
 sub fastMove {
-	my ($self, $coord, $layer, $turns) = @_;
+	my ($self, $coord, $layer, $width, $turns) = @_;
+
+	die "wide moves not yet supported" if $width != 1;
 
 	my $shifts = $self->{__shifts}->[$layer]->[$coord];
 	my ($from, $to) = @{$shifts}[0, $turns];
