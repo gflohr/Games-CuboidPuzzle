@@ -403,7 +403,7 @@ sub state {
 sub move {
 	my ($self, $move) = @_;
 
-	my ($coord, $layer, $width, $turns) = $self->parseMove($move);
+	my ($coord, $layer, $width, $turns) = $self->parseInternalMove($move);
 	if (!defined $coord) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
@@ -615,13 +615,13 @@ sub __setuptLayerIndices {
 sub rotateMove {
 	my ($self, $move, $rotation) = @_;
 
-	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseMove($move);
+	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseInternalMove($move);
 	if (!defined $move_coord) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseMove($rotation);
+	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseInternalMove($rotation);
 	if (!defined $rot_coord) {
 		require Carp;
 		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
@@ -697,7 +697,7 @@ sub render {
 	return $self->{__renderer}->render($self);
 }
 
-sub parseMove {
+sub parseInternalMove {
 	my (undef, $move) = @_;
 
 	return if $move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/;

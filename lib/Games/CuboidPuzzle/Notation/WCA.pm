@@ -102,7 +102,7 @@ sub translate {
 	# FIXME! The cube should be injected.
 	my ($self, $move, $cube) = @_;
 
-	my ($coord, $layer, $width, $turns) = Games::CuboidPuzzle->parseMove($move);
+	my ($coord, $layer, $width, $turns) = Games::CuboidPuzzle->parseInternalMove($move);
 	if (!defined $coord) {
 		die __x("invalid move '{move}'\n", move => $move);
 	}
