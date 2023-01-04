@@ -401,41 +401,45 @@ sub state {
 }
 
 sub move {
-	my ($self, $move) = @_;
+	my ($self, @moves) = @_;
 
-	my ($coord, $layer, $width, $turns) = $self->parseInternalMove($move);
-	if (!defined $coord) {
-		require Carp;
-		Carp::croak(__x("invalid move '{move}'", move => $move));
+	foreach my $move (@moves) {
+		my ($coord, $layer, $width, $turns) = $self->parseInternalMove($move);
+		if (!defined $coord) {
+			require Carp;
+			Carp::croak(__x("invalid move '{move}'", move => $move));
+		}
+
+		die "wide moves not yet supported" if $width != 1;
+
+		if ('x' eq $layer) {
+			if ($coord > $self->{__xwidth}) {
+				require Carp;
+				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+					coord => $coord, to => $self->{__xwidth}));
+			}
+		} elsif ('y' eq $layer) {
+			if ($coord > $self->{__ywidth}) {
+				require Carp;
+				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+					coord => $coord, to => $self->{__ywidth}));
+			}
+		} else {
+			if ($coord > $self->{__zwidth}) {
+				require Carp;
+				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
+					coord => $coord, to => $self->{__zwidth}));
+			}
+		}
+
+		if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), $turns)) {
+			require Carp;
+			Carp::croak(__x("this cube does not support the move '{move}'",
+				move => $move));
+		}
 	}
 
-	die "wide moves not yet supported" if $width != 1;
-
-	if ('x' eq $layer) {
-		if ($coord > $self->{__xwidth}) {
-			require Carp;
-			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-				coord => $coord, to => $self->{__xwidth}));
-		}
-	} elsif ('y' eq $layer) {
-		if ($coord > $self->{__ywidth}) {
-			require Carp;
-			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-				coord => $coord, to => $self->{__ywidth}));
-		}
-	} else {
-		if ($coord > $self->{__zwidth}) {
-			require Carp;
-			Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-				coord => $coord, to => $self->{__zwidth}));
-		}
-	}
-
-	if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), $turns)) {
-		require Carp;
-		Carp::croak(__x("this cube does not support the move '{move}'",
-			move => $move));
-	}
+	return $self;
 }
 
 sub __setupRotations {
