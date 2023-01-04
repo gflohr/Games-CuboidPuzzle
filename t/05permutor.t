@@ -20,9 +20,7 @@ my $cube = Games::CuboidPuzzle->new;
 my $p = Games::CuboidPuzzle::Permutor->new($cube);
 
 my $count = 0;
-my $counter = sub { ++$count };
-
-$p->permute(1, $counter);
+$p->permute(1, sub { ++$count });
 is $count, 27, "depth 1";
 
 done_testing;
