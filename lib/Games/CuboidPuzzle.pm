@@ -88,6 +88,7 @@ sub __setupMoves {
 
 	$self->{__shifts} = [[], [], []];
 
+	$self->__setuptLayerIndices;
 	$self->__setupXMoves;
 	$self->__setupYMoves;
 	$self->__setupZMoves;
@@ -503,96 +504,110 @@ sub layerIndices {
 		Carp::croak(__x("invalid layer id '{id}'", id => $i));
 	}
 
+	my @matrix = @{$self->{__layerIndices}->[$i]};
+	foreach my $row (@matrix) {
+		$row = [@$row];
+	}
+
+	return \@matrix;
+}
+
+
+sub __setuptLayerIndices {
+	my ($self) = @_;
+
 	my $xw = $self->xwidth;
 	my $yw = $self->ywidth;
 	my $zw = $self->zwidth;
 
-	my @rows;
-	# The layers are:
-	#   0
-	# 1 2 3 4
-	#   5
-	my @subs = (
-		# Layer 0.
-		sub {
-			$i = 0;
-			foreach my $rowno (0 .. $zw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $xw - 1) {
-					push @cols, $i++;
+	my @layerIndices;
+	foreach my $i (0 .. 5) {
+		my @rows;
+		# The layers are:
+		#   0
+		# 1 2 3 4
+		#   5
+		my @subs = (
+			# Layer 0.
+			sub {
+				$i = 0;
+				foreach my $rowno (0 .. $zw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $xw - 1) {
+						push @cols, $i++;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-		# Layer 1.
-		sub {
-			foreach my $rowno (0 .. $yw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $zw - 1) {
-					push @cols, $xw * $zw
-						+ $rowno * 2 * ($zw + $xw)
-						+ $colno;
+			},
+			# Layer 1.
+			sub {
+				foreach my $rowno (0 .. $yw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $zw - 1) {
+						push @cols, $xw * $zw
+							+ $rowno * 2 * ($zw + $xw)
+							+ $colno;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-		# Layer 2.
-		sub {
-			foreach my $rowno (0 .. $yw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $xw - 1) {
-					push @cols, $xw * $zw
-						+ $rowno * 2 * ($zw + $xw)
-						+ $zw + $colno;
+			},
+			# Layer 2.
+			sub {
+				foreach my $rowno (0 .. $yw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $xw - 1) {
+						push @cols, $xw * $zw
+							+ $rowno * 2 * ($zw + $xw)
+							+ $zw + $colno;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-		# Layer 3.
-		sub {
-			foreach my $rowno (0 .. $yw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $zw - 1) {
-					push @cols, $xw * $zw
-						+ $rowno * 2 * ($zw + $xw)
-						+ $zw + $xw + $colno;
+			},
+			# Layer 3.
+			sub {
+				foreach my $rowno (0 .. $yw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $zw - 1) {
+						push @cols, $xw * $zw
+							+ $rowno * 2 * ($zw + $xw)
+							+ $zw + $xw + $colno;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-		# Layer 4.
-		sub {
-			foreach my $rowno (0 .. $yw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $xw - 1) {
-					push @cols, $xw * $zw
-						+ $rowno * 2 * ($zw + $xw)
-						+ 2 * $zw + $xw + $colno;
+			},
+			# Layer 4.
+			sub {
+				foreach my $rowno (0 .. $yw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $xw - 1) {
+						push @cols, $xw * $zw
+							+ $rowno * 2 * ($zw + $xw)
+							+ 2 * $zw + $xw + $colno;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-		# Layer 5.
-		sub {
-			$i = $xw * $zw + $yw * 2 * ($zw + $xw);
-			foreach my $rowno (0 .. $zw - 1) {
-				my @cols;
-				foreach my $colno (0 .. $xw - 1) {
-					push @cols, $i++;
+			},
+			# Layer 5.
+			sub {
+				$i = $xw * $zw + $yw * 2 * ($zw + $xw);
+				foreach my $rowno (0 .. $zw - 1) {
+					my @cols;
+					foreach my $colno (0 .. $xw - 1) {
+						push @cols, $i++;
+					}
+					push @rows, \@cols;
 				}
-				push @rows, \@cols;
-			}
-		},
-	);
+			},
+		);
 
-	if ($i > $#subs) {
-		require Carp;
-		Carp::croak(__"layer index {i} is out of range", i => $i);
+		$subs[$i]->();
+
+		push @layerIndices, \@rows;
 	}
 
-	$subs[$i]->();
+	$self->{__layerIndices} = \@layerIndices;
 
-	return \@rows;
+	return $self;
 }
 
 # If MOVE is applied to the cube, what would be the equivalent move of
