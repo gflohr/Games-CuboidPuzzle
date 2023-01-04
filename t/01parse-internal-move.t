@@ -23,7 +23,7 @@ foreach my $test (@tests) {
 	my ($move, $wanted_coord, $wanted_layer, $wanted_width, $wanted_turns)
 		= @$test;
 	my ($got_coord, $got_layer, $got_width, $got_turns)
-		= Games::CuboidPuzzle->parseMove($move);
+		= Games::CuboidPuzzle->parseInternalMove($move);
 	is $got_coord, $wanted_coord, "coord $move";
 	is $got_layer, $wanted_layer, "layer $move";
 	is $got_width, $wanted_width, "width $move";

@@ -61,7 +61,7 @@ K L M N O P Q R S T U V
 W X Y Z a b c d e f g h
     i j k l
     m n o p
-# 0x2
+# x2
     i j k l
     m n o p
 X W h g f e d c b a Z Y
@@ -69,7 +69,7 @@ L K V U T S R Q P O N M
 9 8 J I H G F E D C B A
     0 1 2 3
     4 5 6 7
-# 0y2
+# z2
     7 6 5 4
     3 2 1 0
 E F G H I J 8 9 A B C D
@@ -77,7 +77,7 @@ Q R S T U V K L M N O P
 c d e f g h W X Y Z a b
     p o n m
     l k j i
-# 0z2
+# y2
     p o n m
     l k j i
 d c b a Z Y X W h g f e

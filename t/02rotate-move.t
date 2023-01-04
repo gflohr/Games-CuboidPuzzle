@@ -18,35 +18,35 @@ use Games::CuboidPuzzle;
 my @state = (0 .. 9, 'A' .. 'Z', 'a' .. 'r');
 
 my %tests = (
-	'0x1' => {
-		'1x1' => '1x1',
-		'1x2' => '1x2',
-		'1x3' => '1x3',
-		'1y1' => '3z1',
-		'1y2' => '3z2',
-		'1y3' => '3z3',
-		'1z1' => '1y3',
-		'1z2' => '1y2',
-		'1z3' => '1y1',
+	"x" => {
+		"L'" => "L'",
+		"M'" => "M'",
+		"L" => "L",
+		"F" => "U",
+		"F2" => "U2",
+		"F'" => "U'",
+		"D'" => "F'",
+		"D2" => "F2",
+		"D" => "F",
 	},
-	'0y1' => {
-		'1x1' => '3z3',
-		'1x2' => '3z2',
-		'1x3' => '3z1',
-		'1y1' => '1y1',
-		'1y2' => '1y2',
-		'1y3' => '1y3',
-		'1z1' => '1x1'
+	"z" => {
+		"L'" => "U'",
+		"L2" => "U2",
+		"L" => "U",
+		"F" => "F",
+		"F2" => "F2",
+		"F'" => "F'",
+		"D'" => "L'"
 	},
-	'0z1' => {
-		'3x1' => '1y1',
-		'1y1' => '1x3',
+	"y" => {
+		"R" => "F",
+		"F" => "L",
 	},
-	'0z2' => {
-		'1x1' => '3x3'
+	"y2" => {
+		"L'" => "R'"
 	},
-	'0z3' => {
-		'1x1' => '1y3',
+	"y'" => {
+		"L'" => "F'",
 	}
 );
 
@@ -55,13 +55,18 @@ foreach my $rotation (sort keys %tests) {
 		my $rotated_mover = Games::CuboidPuzzle->new(
 			state => [@state],
 		);
-		my $rotated_move = $rotated_mover->rotateMove($move, $rotation);
+		my ($rotated_move, $garbage) =
+			$rotated_mover->rotateMove($move, $rotation);
+		ok !defined $garbage, "$move after $rotation produced garbage";
 		is $rotated_move, $tests{$rotation}->{$move},
 			"$move after $rotation == $rotated_move";
 		$rotated_mover->move($rotation);
 		$rotated_mover->move($rotated_move);
 		my $opposite_rotation = $rotation;
-		$opposite_rotation =~ s/([123])$/4 - $1/e;
+		if ($opposite_rotation !~ s/'$//
+			&& $opposite_rotation !~ /2$/) {
+			$opposite_rotation .= "'";
+		}
 		$rotated_mover->move($opposite_rotation);
 		my $single_mover = Games::CuboidPuzzle->new(
 			state => [@state],

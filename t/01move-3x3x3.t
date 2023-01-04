@@ -58,7 +58,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 1x1
+# L'
       i 1 2
       W 4 5
       K 7 8
@@ -68,7 +68,7 @@ Z N B 6 b c d e f g h j
       C k l
       O n o
       a q r
-# 1x2
+# L2
       j 1 2
       m 4 5
       p 7 8
@@ -78,7 +78,7 @@ B A 9 K b c d e f g h C
       0 k l
       3 n o
       6 q r
-# 1x3
+# L
       C 1 2
       O 4 5
       a 7 8
@@ -88,7 +88,7 @@ A M Y m P Q R S T U V 3
       i k l
       W n o
       K q r
-# 2x1
+# M'
       0 h 2
       3 V 5
       6 J 8
@@ -98,7 +98,7 @@ X Y Z a 7 c d e f g k i
       j D l
       m P o
       p b r
-# 2x2
+# M2
       0 k 2
       3 n 5
       6 q 8
@@ -108,7 +108,7 @@ X Y Z a J c d e f g D i
       j 1 l
       m 4 o
       p 7 r
-# 2x3
+# M
       0 D 2
       3 P 5
       6 b 8
@@ -118,7 +118,7 @@ X Y Z a q c d e f g 1 i
       j h l
       m V o
       p J r
-# 3x1
+# R
       0 1 g
       3 4 U
       6 7 I
@@ -128,7 +128,7 @@ X Y Z a b 8 F R d l h i
       j k E
       m n Q
       p q c
-# 3x2
+# R2
       0 1 l
       3 4 o
       6 7 r
@@ -138,7 +138,7 @@ X Y Z a b I H G F E h i
       j k 2
       m n 5
       p q 8
-# 3x3
+# R'
       0 1 E
       3 4 Q
       6 7 c
@@ -148,7 +148,7 @@ X Y Z a b r f T H 2 h i
       j k g
       m n U
       p q I
-# 1y1
+# F
       0 1 2
       3 4 5
       6 7 8
@@ -158,7 +158,7 @@ a b c d e f g h i X Y Z
       l o r
       k n q
       j m p
-# 1y2
+# F2
       0 1 2
       3 4 5
       6 7 8
@@ -168,7 +168,7 @@ d e f g h i X Y Z a b c
       r q p
       o n m
       l k j
-# 1y3
+# F'
       0 1 2
       3 4 5
       6 7 8
@@ -178,7 +178,7 @@ g h i X Y Z a b c d e f
       p m j
       q n k
       r o l
-# 2y1
+# S
       0 1 2
       3 4 5
       6 7 8
@@ -188,7 +188,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 2y2
+# S2
       0 1 2
       3 4 5
       6 7 8
@@ -198,7 +198,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 2y3
+# S'
       0 1 2
       3 4 5
       6 7 8
@@ -208,7 +208,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 3y1
+# B'
       6 3 0
       7 4 1
       8 5 2
@@ -218,7 +218,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 3y2
+# B2
       8 7 6
       5 4 3
       2 1 0
@@ -228,7 +228,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 3y3
+# B
       2 5 8
       1 4 7
       0 3 6
@@ -238,7 +238,7 @@ X Y Z a b c d e f g h i
       j k l
       m n o
       p q r
-# 1z1
+# D'
       0 1 2
       3 4 5
       Z N B
@@ -248,7 +248,7 @@ X Y l c Q E 8 e f g h i
       d R F
       m n o
       p q r
-# 1z2
+# D2
       0 1 2
       3 4 5
       l k j
@@ -258,7 +258,7 @@ X Y F E D C B e f g h i
       8 7 6
       m n o
       p q r
-# 1z3
+# D
       0 1 2
       3 4 5
       F R d
@@ -268,7 +268,7 @@ X Y 6 C O a j e f g h i
       B N Z
       m n o
       p q r
-# 2z1
+# E'
       0 1 2
       Y M A
       6 7 8
@@ -278,7 +278,7 @@ X o Z a b c d 5 f g h i
       j k l
       e S G
       p q r
-# 2z2
+# E2
       0 1 2
       o n m
       6 7 8
@@ -288,7 +288,7 @@ X G Z a b c d A f g h i
       j k l
       5 4 3
       p q r
-# 2z3
+# E
       0 1 2
       G S e
       6 7 8
@@ -298,7 +298,7 @@ X 3 Z a b c d m f g h i
       j k l
       A M Y
       p q r
-# 3z1
+# U
       X L 9
       3 4 5
       6 7 8
@@ -308,7 +308,7 @@ r Y Z a b c d e 2 I U g
       j k l
       m n o
       f T H
-# 3z2
+# U2
       r q p
       3 4 5
       6 7 8
@@ -318,7 +318,7 @@ H Y Z a b c d e 9 K J I
       j k l
       m n o
       2 1 0
-# 3z3
+# U'
       H T f
       3 4 5
       6 7 8

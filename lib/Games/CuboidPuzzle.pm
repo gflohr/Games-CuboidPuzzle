@@ -29,7 +29,7 @@ my %defaults = (
 	zwidth => 3,
 	colors => [qw(B O Y R W G)],
 	renderer => Games::CuboidPuzzle::Renderer::Simple->new,
-	notation => Games::CuboidPuzzle::Notation::Conventional->new,
+	notation => 'conventional',
 );
 
 sub new {
@@ -42,6 +42,21 @@ sub new {
 		$self->{'__' . $key} = $args{$key} // $defaults{$key};
 	}
 	$self->{__state} = $args{state} if $args{state};
+
+	# Upgrade notation.
+	my $notation = 'Games::CuboidPuzzle::Notation::'
+		. ucfirst lc $self->{__notation};
+	my $notation_module = $notation;
+	$notation_module =~ s{::}{/}g;
+	$notation_module .= '.pm';
+	eval { require $notation_module };
+	if ($@) {
+		warn $@;
+		require Carp;
+		Carp::croak(__x("unsupported or invalid notation '{notation}'",
+			notation => $self->{__notation}));
+	}
+	$self->{__notation} = $notation->new;
 
 	if (@{$self->{__colors}} != 6) {
 		require Carp;
@@ -404,7 +419,14 @@ sub move {
 	my ($self, @moves) = @_;
 
 	foreach my $move (@moves) {
-		my ($coord, $layer, $width, $turns) = $self->parseInternalMove($move);
+		my $internal_move = $self->parseMove($move);
+		if (!defined $internal_move) {
+			require Carp;
+			Carp::croak(__x("invalid move '{move}'", move => $move));
+		}
+
+		my ($coord, $layer, $width, $turns)
+			= $self->parseInternalMove($internal_move);
 		if (!defined $coord) {
 			require Carp;
 			Carp::croak(__x("invalid move '{move}'", move => $move));
@@ -516,6 +538,30 @@ sub layerIndices {
 	return \@matrix;
 }
 
+sub layerIndicesFlattened {
+	my ($self, $i) = @_;
+
+	# FIXME! The tables should be pre-calculated for performance reasons!
+	# FIXME! There should be a "flat" version that returns a flat list instead
+	# an array of an array.
+	my $j = 0;
+	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+
+	if (exists $colors{$i}) {
+		$i = $colors{$i};
+	} elsif ($i !~ /^[0-5]$/) {
+		require Carp;
+		Carp::croak(__x("invalid layer id '{id}'", id => $i));
+	}
+
+	my @matrix = @{$self->{__layerIndices}->[$i]};
+	my @indices;
+	foreach my $row (@matrix) {
+		push @indices, @$row;
+	}
+
+	return @indices;
+}
 
 sub __setuptLayerIndices {
 	my ($self) = @_;
@@ -619,13 +665,25 @@ sub __setuptLayerIndices {
 sub rotateMove {
 	my ($self, $move, $rotation) = @_;
 
-	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseInternalMove($move);
+	my $internal_move = $self->parseMove($move);
+	if (!defined $internal_move) {
+		require Carp;
+		Carp::croak(__x("invalid move '{move}'", move => $move));
+	}
+
+	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseInternalMove($internal_move);
 	if (!defined $move_coord) {
 		require Carp;
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseInternalMove($rotation);
+	my $internal_rotation = $self->parseMove($rotation);
+	if (!defined $internal_rotation) {
+		require Carp;
+		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
+	}
+
+	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseInternalMove($internal_rotation);
 	if (!defined $rot_coord) {
 		require Carp;
 		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
@@ -648,7 +706,17 @@ sub rotateMove {
 	if ($rot_turns == 2) {
 		my $turns = 4 - $move_turns;
 		my $coord = $width + 1 - $move_coord;
-		return "$coord$move_layer$turns";
+		my $rotated_internal_move = "$coord$move_layer$turns";
+
+		my @rotated_moves = eval {
+			$self->{__notation}->translate($rotated_internal_move, $self);
+		};
+		if ($@) {
+			die(__x("notation cannot translat rotated_move '{rotated_move}'",
+				rotated_move => $rotated_internal_move));
+		}
+
+		return @rotated_moves;
 	}
 
 	# The key is the roation axis, the inner key the layer that moves.
@@ -692,13 +760,35 @@ sub rotateMove {
 
 	$move_width = '' if 1 == $move_width;
 
-	return "$coord$layer$move_width$turns";
+	my $rotated_internal_move = "$coord$layer$move_width$turns";
+	my @rotated_moves = eval {
+		$self->{__notation}->translate($rotated_internal_move, $self);
+	};
+	if ($@) {
+		die(__x("notation cannot translat rotated_move '{rotated_move}'",
+			rotated_move => $rotated_internal_move));
+	}
+
+	return @rotated_moves;
 }
 
 sub render {
 	my ($self) = @_;
 
 	return $self->{__renderer}->render($self);
+}
+
+sub parseMove {
+	my ($self, $move) = @_;
+
+	my $internal_move = eval { $self->{__notation}->parse($move, $self) };
+
+	if ($@) {
+		require Carp;
+		Carp::croak(__x("invalid move '{move}'", move => $move));
+	}
+
+	return $internal_move;
 }
 
 sub parseInternalMove {
@@ -719,6 +809,9 @@ sub conditionSolved {
 
 	my ($from, $to) = defined $layer_id ? ($layer_id, $layer_id) : (0 .. 5);
 	foreach my $i ($from .. $to) {
+		my @indices = $self->layerIndicesFlat($i);
+		use Data::Dumper;
+		die Dumper \@indices;
 	}
 
 	return $self;

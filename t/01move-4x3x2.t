@@ -34,6 +34,7 @@ foreach my $case (pairs @cases) {
 		ywidth => 3,
 		zwidth => 2,
 		state => [@state],
+		notation => 'internal',
 	);
 	$cube->move($move);
 	my $got = "\n" . $renderer->render($cube);

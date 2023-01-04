@@ -9,7 +9,7 @@
 # to Public License, Version 2, as published by Sam Hocevar. See
 # http://www.wtfpl.net/ for more details.
 
-package Games::CuboidPuzzle::Notation::WCA;
+package Games::CuboidPuzzle::Notation::Wca;
 
 use strict;
 use v5.10;

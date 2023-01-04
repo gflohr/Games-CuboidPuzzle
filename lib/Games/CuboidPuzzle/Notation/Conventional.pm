@@ -14,7 +14,7 @@ package Games::CuboidPuzzle::Notation::Conventional;
 use strict;
 use v5.10;
 
-use base qw(Games::CuboidPuzzle::Notation::WCA);
+use base qw(Games::CuboidPuzzle::Notation::Wca);
 
 use Locale::TextDomain qw(1.32);
 use Games::CuboidPuzzle;
@@ -30,7 +30,7 @@ sub parse {
 		"M'" => '2x1',
 		"S" => '2y1',
 		"S2" => '2y2',
-		"S3" => '2y3',
+		"S'" => '2y3',
 		"E" => '2z3',
 		"E2" => '2z2',
 		"E'" => '2z1',
