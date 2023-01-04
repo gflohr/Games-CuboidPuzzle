@@ -27,6 +27,6 @@ ok $cube->conditionSolved, "after z";
 $cube->move("R");
 ok !$cube->conditionSolved, "after R";
 $cube->move("R'");
-ok !$cube->conditionSolved, "after R'";
+ok $cube->conditionSolved, "after R'";
 
 done_testing;

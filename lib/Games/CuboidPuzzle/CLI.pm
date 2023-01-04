@@ -61,7 +61,6 @@ sub dispatch {
 		};
 
 		GetOptionsFromArray($self->{__global_options},
-			'log-stderr' => \$options{log_stderr},
 			'q|quiet' => \$options{quiet},
 			'h|help' => \$options{help},
 			'v|verbose' => \$options{verbose},
@@ -77,14 +76,14 @@ sub dispatch {
 	$cmd =~ s/-/::/g;
 	$self->usageError(__x("invalid command name '{command}'",
 							command => $self->{__cmd}))
-		if !perl_class $cmd;
+		if !$self->__perlClass($cmd);
 
 	$cmd = join '::', map {
 		ucfirst $_;
 	} split /::/, $cmd;
 
 	my $class = 'Games::CuboidPuzzle::Command::' . $cmd;
-	my $module = class2module $class;
+	my $module = $self->__class2module($class);
 
 	eval { require $module };
 	if ($@) {
@@ -126,6 +125,7 @@ EOF
 	$msg .= __<<EOF;
   repeat                      repeat an algorithm until it reaches the initial
                               position
+  solve                       solve a cube
 EOF
 
 	$msg .= "\n";
@@ -207,6 +207,20 @@ Written by Guido Flohr (http://www.guido-flohr.net/).
 	print $msg;
 
 	exit 0;
+}
+
+sub __perlClass {
+	my ($self, $name) = @_;
+
+	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
+}
+
+sub __class2module {
+	my ($self, $classname) = @_;
+
+	$classname =~ s{(?:::|')}{/}g;
+
+	return $classname . '.pm';
 }
 
 1;

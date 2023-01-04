@@ -27,7 +27,9 @@ my %defaults = (
 	xwidth => 3,
 	ywidth => 3,
 	zwidth => 3,
+	# FIXME! Optionally split by space if scalar!
 	colors => [qw(B O Y R W G)],
+	# FIXME! Use identifiers, not packages!
 	renderer => Games::CuboidPuzzle::Renderer::Simple->new,
 	notation => 'conventional',
 );
@@ -41,6 +43,8 @@ sub new {
 	foreach my $key (keys %defaults) {
 		$self->{'__' . $key} = $args{$key} // $defaults{$key};
 	}
+
+	# FIXME! Optionally split by space if scalar!
 	$self->{__state} = $args{state} if $args{state};
 
 	# Upgrade notation.
@@ -809,12 +813,45 @@ sub conditionSolved {
 
 	my ($from, $to) = defined $layer_id ? ($layer_id, $layer_id) : (0 .. 5);
 	foreach my $i ($from .. $to) {
-		my @indices = $self->layerIndicesFlat($i);
-		use Data::Dumper;
-		die Dumper \@indices;
+		my @indices = $self->layerIndicesFlattened($i);
+		my @colors = @{$self->{__state}}[@indices];
+		foreach my $color (@colors) {
+			return if $color ne $colors[0];
+		}
 	}
 
 	return $self;
+}
+
+sub translateMove {
+	my ($self, $internal_move) = @_;
+
+	return $self->{__notation}->translate($internal_move, $self);
+}
+
+sub supportedMoves {
+	my ($self) = @_;
+
+	my @moves;
+	my @layer_ids = qw(x y z);
+	my $shifts = $self->{__shifts};
+	foreach my $layer (0 .. $#$shifts) {
+		my $layer_id = $layer_ids[$layer];
+		my $coords = $shifts->[$layer];
+		foreach my $coord (0 .. $#$coords) {
+			foreach my $turns (1 .. 3) {
+				next if !defined $coords->[$turns];
+				push @moves, "$coord$layer_id$turns";
+			}
+		}
+	}
+
+	my @translated;
+	foreach my $move (@moves) {
+		push @translated, $self->translateMove($move);
+	}
+
+	return @translated;
 }
 
 1;

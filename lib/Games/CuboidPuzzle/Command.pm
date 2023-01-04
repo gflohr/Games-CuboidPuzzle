@@ -16,6 +16,7 @@ use strict;
 use File::Spec;
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
+use Games::CuboidPuzzle;
 use Games::CuboidPuzzle::CLI;
 
 sub new {
@@ -87,7 +88,7 @@ sub _displayHelp {
 		return $class . '.pm';
 	};
 
-	my $module = class2module->(ref $self);
+	my $module = $class2module->(ref $self);
 
 	my $path = $INC{$module};
 	$path = './' . $path if !File::Spec->file_name_is_absolute($path);
@@ -99,4 +100,28 @@ sub _displayHelp {
 	exit(Pod::Perldoc->run());
 }
 
+sub _cube {
+	my ($self, $options) = @_;
+
+	return Games::CuboidPuzzle->new(%$options);
+}
+
+sub _expandMoves {
+	my ($self, $args) = @_;
+
+	my @moves;
+	foreach my $arg (@$args) {
+		push @moves,
+			map { s/i/'/g; $_ }
+			grep { length } split /[ \t]/, $arg;
+	}
+
+	return @moves;
+}
+
+sub _class2module {
+	my ($self, $class_name) = @_;
+
+	return Games::CuboidPuzzle::CLI->__class2module($class_name);
+}
 1;
