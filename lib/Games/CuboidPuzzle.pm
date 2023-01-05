@@ -107,7 +107,7 @@ sub __setupMoves {
 
 	$self->{__shifts} = [[], [], []];
 
-	$self->__setuptLayerIndices;
+	$self->__setupLayerIndices;
 	$self->__setupXMoves;
 	$self->__setupYMoves;
 	$self->__setupZMoves;
@@ -560,16 +560,10 @@ sub layerIndicesFlattened {
 		Carp::croak(__x("invalid layer id '{id}'", id => $i));
 	}
 
-	my @matrix = @{$self->{__layerIndices}->[$i]};
-	my @indices;
-	foreach my $row (@matrix) {
-		push @indices, @$row;
-	}
-
-	return @indices;
+	return @{$self->{__layerIndicesFlattened}->[$i]};
 }
 
-sub __setuptLayerIndices {
+sub __setupLayerIndices {
 	my ($self) = @_;
 
 	my $xw = $self->xwidth;
@@ -577,6 +571,7 @@ sub __setuptLayerIndices {
 	my $zw = $self->zwidth;
 
 	my @layerIndices;
+	my @layerIndicesFlattened;
 	foreach my $i (0 .. 5) {
 		my @rows;
 		# The layers are:
@@ -659,9 +654,12 @@ sub __setuptLayerIndices {
 		$subs[$i]->();
 
 		push @layerIndices, \@rows;
+		my @flattened = map { @$_ } @rows;
+		push @layerIndicesFlattened, \@flattened;
 	}
 
 	$self->{__layerIndices} = \@layerIndices;
+	$self->{__layerIndicesFlattened} = \@layerIndicesFlattened;
 
 	return $self;
 }
