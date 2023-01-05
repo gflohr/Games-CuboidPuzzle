@@ -8,6 +8,7 @@
 # http://www.wtfpl.net/ for more details.
 
 use strict;
+use v5.10;
 
 use Test::More;
 
@@ -20,7 +21,13 @@ my $cube = Games::CuboidPuzzle->new;
 my $p = Games::CuboidPuzzle::Permutor->new($cube);
 
 my $count = 0;
-$p->permute(1, sub { ++$count });
+$p->permute(1, sub { ++$count; return 1 });
 is $count, 27, "depth 1";
+ok $cube->conditionSolved, "solved after depth 1";
+
+$count = 0;
+$p->permute(2, sub { ++$count; return 1 });
+is $count, 27 * (27 - 3), "depth 2";
+ok $cube->conditionSolved, "solved after depth 2";
 
 done_testing;

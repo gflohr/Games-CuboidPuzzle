@@ -36,29 +36,56 @@ sub new {
 sub permute {
 	my ($self, $max_depth, $callback) = @_;
 
-	$self->__doPermute(1, $max_depth, $callback);
+	$self->__doPermute(1, $max_depth, [], $callback);
 
 	return $self;
 }
 
 sub __doPermute {
-	my ($self, $depth, $max_depth, $callback) = @_;
+	my ($self, $depth, $max_depth, $path, $callback) = @_;
 
 	my $cube = $self->{__cube};
+	my $done;
 	foreach my $move (keys %{$self->{__supported}}) {
 		my ($coord, $layer, $turns) = @{$self->{__supported}->{$move}};
+		if (@$path) {
+			my $last = $path->[-1];
+			if ($last->[0] == $coord && $last->[1] eq $layer) {
+				next;
+			}
+		}
 
 		$cube->fastMove($coord, $layer, 1, $turns);
+		push @$path, [$coord, $layer, 1, $turns];
 
 		if ($depth == $max_depth) {
-			$callback->();
+			$callback->($path) or $done = 1;
 		} else {
-			$self->__doPermute($depth + 1, $max_depth, $callback);
+			$self->__doPermute($depth + 1, $max_depth, $path, $callback)
+				or $done = 1;
 		}
+
+		pop @$path;
 		$cube->fastMove($coord, $layer, 1, 4 - $turns);
+
+		return if $done;
 	}
 
 	return $self;
+}
+
+sub translatePath {
+	my ($self, $path) = @_;
+
+	return join ' ', map { $self->translateMove($_) } @$path;
+}
+
+sub translateMove {
+	my ($self, $move) = @_;
+
+	my ($coord, $layer, $width, $turns) = @$move;
+	$width = '' if 1 == $width;
+	return $self->{__cube}->translateMove("$coord$layer$width$turns");
 }
 
 1;
