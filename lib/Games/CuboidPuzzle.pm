@@ -815,8 +815,7 @@ sub conditionSolved {
 
 	my ($from, $to) = defined $layer_id ? ($layer_id, $layer_id) : (0 .. 5);
 	foreach my $i ($from .. $to) {
-		my @indices = $self->layerIndicesFlattened($i);
-		my @colors = @{$self->{__state}}[@indices];
+		my @colors = @{$self->{__state}}[@{$self->{__layerIndicesFlattened}->[$i]}];
 		foreach my $color (@colors) {
 			return if $color ne $colors[0];
 		}
