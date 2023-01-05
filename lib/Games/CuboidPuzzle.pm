@@ -892,14 +892,37 @@ sub conditionSolved {
 	return $self;
 }
 
+sub findLayer {
+	my ($self, $color) = @_;
+
+	foreach my $layer (0 .. 5) {
+		my $layer_indices = $self->layerIndices($layer);
+		my @rows = @$layer_indices;
+		if ($#rows & 0x1) {
+			require Carp;
+			Carp::croak("layer {layer} has an even number of rows",
+				layer => $layer);
+		}
+		my @stickers = @{$rows[$#rows >> 1]};
+		if ($#stickers & 0x1) {
+			require Carp;
+			Carp::croak("layer {layer} has an even number of columns",
+				layer => $layer);
+		}
+		return $layer if $stickers[$#stickers >> 1] eq $color;
+	}
+
+	return;
+}
+
 sub conditionCrossSolved {
-	my ($self, $i) = @_;
+	my ($self, $layer) = @_;
 
-	my $crossIndicesFlattened = $self->{__crossIndicesFlattened}->[$i];
+	my $crossIndicesFlattened = $self->{__crossIndicesFlattened}->[$layer];
 	my @colors = uniq @{$self->{__state}}[@$crossIndicesFlattened];
-	return if $#colors;
+	return $self if 0 == $#colors;
 
-	return $self;
+	return;
 }
 
 sub conditionAnyCrossSolved {

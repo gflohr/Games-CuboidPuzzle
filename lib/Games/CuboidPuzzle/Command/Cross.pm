@@ -24,7 +24,9 @@ use Games::CuboidPuzzle::Permutor;
 
 sub _getDefaults { }
 
-sub _getOptionSpecs {}
+sub _getOptionSpecs {
+	color => 'c|color=s',
+}
 
 sub _run {
 	my ($self, $args, $global_options, %options) = @_;
@@ -36,7 +38,18 @@ sub _run {
 		$cube->move($move);
 	}
 
-	my @solves = $self->__solveAnyCross($cube, %options);
+	if (defined $options{color}) {
+		my @exists = grep { $_ eq $options{color} } $cube->state;
+		if (!@exists) {
+			Games::CuboidPuzzle::CLI->commandUsageError(
+				__x("cube has no color '{color}'",
+					color => $options{color}));
+		}
+	}
+
+	my @solves = defined $options{color} ?
+		$self->__solveCross($cube, %options)
+		: $self->__solveAnyCross($cube, %options);
 
 	my %solves;
 	foreach my $solve (@solves) {
@@ -45,7 +58,8 @@ sub _run {
 			next if !$cube->conditionCrossSolved($layer);
 			my @crossIndices = $cube->crossIndicesFlattened($layer);
 			my @state = $cube->state;
-			my $color = $state[0];
+			my @crossColors = @state[@crossIndices];
+			my $color = $crossColors[0];
 			$solves{$color} ||= [];
 			push @{$solves{$color}}, $solve;
 		}
@@ -53,10 +67,12 @@ sub _run {
 		$cube->unmove(@$solve);
 	}
 
-	foreach my $color (keys %solves) {
-		say __x("color: {color}", color => $color);
-		foreach my $solve (@{$solves{$color}}) {
-			say join ' ', @$solve;
+	foreach my $color (sort keys %solves) {
+		foreach my $solve (sort @{$solves{$color}}) {
+			say __x("color {color}: {solve}",
+				color => $color,
+				solve => join ' ', @$solve,
+			);
 		}
 	}
 
@@ -86,6 +102,43 @@ sub __solveAnyCross {
 			foreach my $i (0 .. 5) {
 				my @colors = uniq @{$cube->{__state}}[@{$crossIndicesFlattened[$i]}];
 				if (@colors == 1) {
+					push @solves, [$p->translatePath($path)];
+					last;
+				}
+			}
+
+			return 1;
+		});
+
+		last if @solves;
+	}
+
+	return @solves;
+}
+
+sub __solveCross {
+	my ($self, $cube, %options) = @_;
+
+	if ($cube->conditionCrossSolved($options{color})) {
+		Games::CuboidPuzzle::CLI->commandUsageError(solve
+			=> __"this cross is already solved on this cube");
+	}
+
+	my @crossIndicesFlattened = map { [$cube->crossIndicesFlattened($_)] } (0 .. 5);
+
+	my @solves;
+	my $depth = 0;
+	my $p = Games::CuboidPuzzle::Permutor->new($cube);
+	while (1) {
+		++$depth;
+		last if exists $options{max_depth} && $depth > $options{max_depth};
+
+		$p->permute($depth, sub {
+			my ($path) = @_;
+
+			foreach my $i (0 .. 5) {
+				my @colors = uniq @{$cube->{__state}}[@{$crossIndicesFlattened[$i]}];
+				if (@colors == 1 && $colors[0] eq $options{color}) {
 					push @solves, [$p->translatePath($path)];
 					last;
 				}

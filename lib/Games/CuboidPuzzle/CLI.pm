@@ -125,6 +125,7 @@ EOF
 	$msg .= __<<EOF;
   repeat                      repeat an algorithm until it reaches the initial
                               position
+  render                      render the cube
   solve                       solve a cube
   cross                       solve the first cross
 EOF
