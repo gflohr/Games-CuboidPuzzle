@@ -16,56 +16,36 @@ use v5.10;
 
 use base qw(Games::CuboidPuzzle::Solver);
 
+use Games::CuboidPuzzle::Permutor;
+
 sub solve {
-	my ($self, $cube) = @_;
+	my ($self, $cube, %options) = @_;
 
-	my %seen;
-
-	my @supported = $cube->supportedMoves;
-	my @tries;
-	my %seen;
-	foreach my $move (@supported) {
-		my ($internal_move) = $cube->parseMove($move);
-		my ($coord, $layer, $width, $turns) = $cube->parseInternalMove($internal_move);
-		next if !$coord;
-		next if $width != 1;
-		push @tries, [
-			$internal_move,
-			[$coord, $layer, $width, $turns],
-			[$coord, $layer, $width, 4 - $turns],
-		];
-	}
+	my $p = Games::CuboidPuzzle::Permutor->new($cube);
+	my @solves;
 
 	my $depth = 0;
 	while (1) {
-		my @solves = $self->__solve($cube, ++$depth, \@tries, \%seen) or next;
+		++$depth;
+		last if exists $options{max_depth} && $depth > $options{max_depth};
+
+		$p->permute($depth, sub {
+			my ($path) = @_;
+
+			if ($cube->conditionSolved) {
+				push @solves, $p->translatePath($path);
+				warn $solves[-1];
+				warn $cube->render;
+				return !$options{find_all};
+			}
+
+			return 1;
+		});
+
+		last if @solves;
 	}
 
-	# Not reached.
-}
-
-sub __solve {
-	my ($self, $cube, $depth, $tries, $seen) = @_;
-
-	my @path = (0 .. $depth - 1);
-	while ($path[0] < $depth) {
-
-	}
-
-	return;
-}
-
-sub __increasePath {
-	my ($self, $path, $items) = @_;
-
-	my $i;
-	while ($i < @$path) {
-		return $path if ++$path->[$i] < $items;
-		$path->[$i++] = 0;
-	}
-
-	return;
-
+	return @solves;
 }
 
 1;
