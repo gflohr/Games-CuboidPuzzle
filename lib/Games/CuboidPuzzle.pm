@@ -420,46 +420,79 @@ sub state {
 	wantarray ? @{shift->{__state}} : join ':', @{shift->{__state} };
 }
 
+sub __checkMove {
+	my ($self, $move) = @_;
+
+	my $internal_move = $self->parseMove($move);
+	die __x("invalid move '{move}'\n", move => $move)
+		if !defined $internal_move;
+
+	my ($coord, $layer, $width, $turns)
+		= $self->parseInternalMove($internal_move);
+	die __x("invalid move '{move}'\n", move => $move)
+		if !defined $coord;
+
+	die "wide moves not yet supported\n" if $width != 1;
+
+	if (0 == $layer) {
+		if ($coord > $self->{__xwidth}) {
+			die __x("coordinate '{coord}' out of range (0 to {to})\n",
+				coord => $coord, to => $self->{__xwidth});
+		}
+	} elsif (1 == $layer) {
+		if ($coord > $self->{__ywidth}) {
+			die __x("coordinate '{coord}' out of range (0 to {to})\n",
+				coord => $coord, to => $self->{__ywidth});
+		}
+	} else {
+		if ($coord > $self->{__zwidth}) {
+			die __x("coordinate '{coord}' out of range (0 to {to})\n",
+				coord => $coord, to => $self->{__zwidth});
+		}
+	}
+
+	return $coord, $layer, $width, $turns;
+}
+
 sub move {
 	my ($self, @moves) = @_;
 
 	foreach my $move (@moves) {
-		my $internal_move = $self->parseMove($move);
-		if (!defined $internal_move) {
+		my ($coord, $layer, $width, $turns) = eval {
+			$self->__checkMove($move);
+		};
+		if ($@) {
+			my $error = $@;
+			chop $@;
 			require Carp;
-			Carp::croak(__x("invalid move '{move}'", move => $move));
-		}
-
-		my ($coord, $layer, $width, $turns)
-			= $self->parseInternalMove($internal_move);
-		if (!defined $coord) {
-			require Carp;
-			Carp::croak(__x("invalid move '{move}'", move => $move));
-		}
-
-		die "wide moves not yet supported" if $width != 1;
-
-		if (0 == $layer) {
-			if ($coord > $self->{__xwidth}) {
-				require Carp;
-				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-					coord => $coord, to => $self->{__xwidth}));
-			}
-		} elsif (1 == $layer) {
-			if ($coord > $self->{__ywidth}) {
-				require Carp;
-				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-					coord => $coord, to => $self->{__ywidth}));
-			}
-		} else {
-			if ($coord > $self->{__zwidth}) {
-				require Carp;
-				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
-					coord => $coord, to => $self->{__zwidth}));
-			}
+			Carp::croak($@);
 		}
 
 		if (!$self->fastMove($coord, $layer, 1, $turns)) {
+			require Carp;
+			Carp::croak(__x("this cube does not support the move '{move}'",
+				move => $move));
+		}
+	}
+
+	return $self;
+}
+
+sub unmove {
+	my ($self, @moves) = @_;
+
+	foreach my $move (reverse @moves) {
+		my ($coord, $layer, $width, $turns) = eval {
+			$self->__checkMove($move);
+		};
+		if ($@) {
+			my $error = $@;
+			chop $@;
+			require Carp;
+			Carp::croak($@);
+		}
+
+		if (!$self->fastMove($coord, $layer, 1, 4 - $turns)) {
 			require Carp;
 			Carp::croak(__x("this cube does not support the move '{move}'",
 				move => $move));
