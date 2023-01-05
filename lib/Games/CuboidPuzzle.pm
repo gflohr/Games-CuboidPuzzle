@@ -892,6 +892,16 @@ sub conditionSolved {
 	return $self;
 }
 
+sub conditionCrossSolved {
+	my ($self, $i) = @_;
+
+	my $crossIndicesFlattened = $self->{__crossIndicesFlattened}->[$i];
+	my @colors = uniq @{$self->{__state}}[@$crossIndicesFlattened];
+	return if $#colors;
+
+	return $self;
+}
+
 sub conditionAnyCrossSolved {
 	my ($self) = @_;
 

@@ -38,8 +38,26 @@ sub _run {
 
 	my @solves = $self->__solveAnyCross($cube, %options);
 
+	my %solves;
 	foreach my $solve (@solves) {
-		say join ' ', @$solve;
+		$cube->move(@$solve);
+		foreach my $layer (0 .. 5) {
+			next if !$cube->conditionCrossSolved($layer);
+			my @crossIndices = $cube->crossIndicesFlattened($layer);
+			my @state = $cube->state;
+			my $color = $state[0];
+			$solves{$color} ||= [];
+			push @{$solves{$color}}, $solve;
+		}
+
+		$cube->unmove(@$solve);
+	}
+
+	foreach my $color (keys %solves) {
+		say __x("color: {color}", color => $color);
+		foreach my $solve (@{$solves{$color}}) {
+			say join ' ', @$solve;
+		}
 	}
 
 	return $self;
