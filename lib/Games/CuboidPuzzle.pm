@@ -19,6 +19,7 @@ use v5.10;
 
 use Locale::TextDomain qw(1.32);
 use POSIX qw(ceil);
+use List::MoreUtils qw(uniq);
 
 use Games::CuboidPuzzle::Renderer::Simple;
 use Games::CuboidPuzzle::Notation::Conventional;
@@ -520,12 +521,17 @@ sub fastMove {
 	return $self;
 }
 
+sub ultraFastMove {
+	my $shifts = $_[0]->{__shifts}->[$_[2]]->[$_[1]];
+	my ($from, $to) = @{$shifts}[0, $_[4]];
+
+	my $state = $_[0]->{__state};
+	@{$state}[@$to] = @{$state}[@$from];
+}
+
 sub layerIndices {
 	my ($self, $i) = @_;
 
-	# FIXME! The tables should be pre-calculated for performance reasons!
-	# FIXME! There should be a "flat" version that returns a flat list instead
-	# an array of an array.
 	my $j = 0;
 	my %colors = map { $_ => $j++ } @{$self->{__colors}};
 
@@ -547,9 +553,6 @@ sub layerIndices {
 sub layerIndicesFlattened {
 	my ($self, $i) = @_;
 
-	# FIXME! The tables should be pre-calculated for performance reasons!
-	# FIXME! There should be a "flat" version that returns a flat list instead
-	# an array of an array.
 	my $j = 0;
 	my %colors = map { $_ => $j++ } @{$self->{__colors}};
 
@@ -563,6 +566,22 @@ sub layerIndicesFlattened {
 	return @{$self->{__layerIndicesFlattened}->[$i]};
 }
 
+sub crossIndicesFlattened {
+	my ($self, $i) = @_;
+
+	my $j = 0;
+	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+
+	if (exists $colors{$i}) {
+		$i = $colors{$i};
+	} elsif ($i !~ /^[0-5]$/) {
+		require Carp;
+		Carp::croak(__x("invalid layer id '{id}'", id => $i));
+	}
+
+	return @{$self->{__crossIndicesFlattened}->[$i]};
+}
+
 sub __setupLayerIndices {
 	my ($self) = @_;
 
@@ -572,6 +591,7 @@ sub __setupLayerIndices {
 
 	my @layerIndices;
 	my @layerIndicesFlattened;
+	my @crossIndicesFlattened;
 	foreach my $i (0 .. 5) {
 		my @rows;
 		# The layers are:
@@ -656,10 +676,27 @@ sub __setupLayerIndices {
 		push @layerIndices, \@rows;
 		my @flattened = map { @$_ } @rows;
 		push @layerIndicesFlattened, \@flattened;
+
+		my @cross;
+		for (my $i = 1; $i < $#{$rows[0]}; ++$i) {
+			push @cross, $rows[0]->[$i];
+		}
+		if (@rows > 2) {
+			for (my $i = 1; $i < $#rows; ++$i) {
+				push @cross, @{$rows[$i]};
+			}
+		}
+		if (@rows > 1) {
+			for (my $i = 1; $i < $#{$rows[-1]}; ++$i) {
+				push @cross, $rows[-1]->[$i];
+			}
+		}
+		push @crossIndicesFlattened, \@cross;
 	}
 
 	$self->{__layerIndices} = \@layerIndices;
 	$self->{__layerIndicesFlattened} = \@layerIndicesFlattened;
+	$self->{__crossIndicesFlattened} = \@crossIndicesFlattened;
 
 	return $self;
 }
@@ -811,14 +848,24 @@ sub parseInternalMove {
 }
 
 sub conditionSolved {
-	my ($self, $layer_id) = @_;
+	my ($self) = @_;
 
-	my ($from, $to) = defined $layer_id ? ($layer_id, $layer_id) : (0 .. 5);
-	foreach my $i ($from .. $to) {
-		my @colors = @{$self->{__state}}[@{$self->{__layerIndicesFlattened}->[$i]}];
-		foreach my $color (@colors) {
-			return if $color ne $colors[0];
-		}
+	my $layerIndicesFlattened = $self->{__layerIndicesFlattened};
+	foreach my $i (0 .. 5) {
+		my @colors = uniq @{$self->{__state}}[@{$layerIndicesFlattened->[$i]}];
+		return if $#colors;
+	}
+
+	return $self;
+}
+
+sub conditionAnyCrossSolved {
+	my ($self) = @_;
+
+	my $crossIndicesFlattened = $self->{__crossIndicesFlattened};
+	foreach my $i (0 .. 5) {
+		my @colors = uniq @{$self->{__state}}[@{$crossIndicesFlattened->[$i]}];
+		return if $#colors;
 	}
 
 	return $self;

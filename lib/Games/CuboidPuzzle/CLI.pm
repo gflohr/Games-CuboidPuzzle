@@ -126,6 +126,7 @@ EOF
   repeat                      repeat an algorithm until it reaches the initial
                               position
   solve                       solve a cube
+  cross                       solve the first cross
 EOF
 
 	$msg .= "\n";

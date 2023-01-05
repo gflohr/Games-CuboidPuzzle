@@ -16,12 +16,16 @@ use v5.10;
 
 use base qw(Games::CuboidPuzzle::Solver);
 
+use List::MoreUtils qw(uniq);
+
 use Games::CuboidPuzzle::Permutor;
 
 sub solve {
 	my ($self, $cube, %options) = @_;
 
 	my $p = Games::CuboidPuzzle::Permutor->new($cube);
+	my @layerIndicesFlattened = map { [$cube->layerIndicesFlattened($_)] } (0 .. 5);
+
 	my @solves;
 
 	my $depth = 0;
@@ -32,12 +36,13 @@ sub solve {
 		$p->permute($depth, sub {
 			my ($path) = @_;
 
-			if ($cube->conditionSolved) {
-				push @solves, [$p->translatePath($path)];
-				return !$options{find_all};
+			foreach my $i (0 .. 5) {
+				my @colors = uniq @{$cube->{__state}}[@{$layerIndicesFlattened[$i]}];
+				return 1 if $#colors;
 			}
 
-			return 1;
+			push @solves, [$p->translatePath($path)];
+			return !$options{find_all};
 		});
 
 		last if @solves;

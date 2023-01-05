@@ -56,7 +56,7 @@ sub __doPermute {
 		}
 
 		push @$path, [$coord, $layer, 1, $turns];
-		$cube->fastMove($coord, $layer, 1, $turns);
+		$cube->ultraFastMove($coord, $layer, 1, $turns);
 
 		if ($depth == $max_depth) {
 			$callback->($path) or $done = 1;
