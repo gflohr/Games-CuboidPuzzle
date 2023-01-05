@@ -20,12 +20,24 @@ use Games::CuboidPuzzle::Solver::BruteForce;
 my $cube = Games::CuboidPuzzle->new;
 my $solver = Games::CuboidPuzzle::Solver::BruteForce->new;
 
-$cube->move("R");
-my @solves = $solver->solve($cube, max_depth => 1);
-my $num_solutions = scalar @solves;
-my @wanted = ("R'");
+my (@solves, $num_solutions, @wanted);
 
+$cube->move("R");
+@solves = $solver->solve($cube, max_depth => 1);
+$num_solutions = scalar @solves;
+@wanted = (["R'"]);
 is $num_solutions, 1, "one solution for R";
 is_deeply \@solves, \@wanted, "found R' after R";
+$cube->move(@{$solves[0]});
+ok $cube->conditionSolved, "solution for R works";
+
+$cube->move("R2", "F2");
+@solves = sort $solver->solve($cube, max_depth => 2);
+$num_solutions = scalar @solves;
+@wanted = (["F2", "R2"]);
+is $num_solutions, 1, "one solution for R2 F2";
+is_deeply \@solves, \@wanted, "found F2 R2 after R2 F@";
+$cube->move(@{$solves[0]});
+ok $cube->conditionSolved, "solution for R2 F2 works";
 
 done_testing;

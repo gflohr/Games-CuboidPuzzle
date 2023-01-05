@@ -107,6 +107,7 @@ sub translate {
 		die __x("invalid move '{move}'\n", move => $move);
 	}
 
+	$layer = chr($layer + ord 'x');
 	my $width_method = $layer . 'width';
 	my $cube_width = $cube->$width_method;
 

@@ -33,9 +33,7 @@ sub solve {
 			my ($path) = @_;
 
 			if ($cube->conditionSolved) {
-				push @solves, $p->translatePath($path);
-				warn $solves[-1];
-				warn $cube->render;
+				push @solves, [$p->translatePath($path)];
 				return !$options{find_all};
 			}
 

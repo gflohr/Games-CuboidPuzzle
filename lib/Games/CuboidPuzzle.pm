@@ -438,13 +438,13 @@ sub move {
 
 		die "wide moves not yet supported" if $width != 1;
 
-		if ('x' eq $layer) {
+		if (0 == $layer) {
 			if ($coord > $self->{__xwidth}) {
 				require Carp;
 				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
 					coord => $coord, to => $self->{__xwidth}));
 			}
-		} elsif ('y' eq $layer) {
+		} elsif (1 == $layer) {
 			if ($coord > $self->{__ywidth}) {
 				require Carp;
 				Carp::croak(__x("coordinate '{coord}' out of range (0 to {to})",
@@ -458,7 +458,7 @@ sub move {
 			}
 		}
 
-		if (!$self->fastMove($coord, (ord $layer) - (ord 'x'), 1, $turns)) {
+		if (!$self->fastMove($coord, $layer, 1, $turns)) {
 			require Carp;
 			Carp::croak(__x("this cube does not support the move '{move}'",
 				move => $move));
@@ -700,19 +700,21 @@ sub rotateMove {
 		Carp::croak(__x("rotation '{rotation}' is not a rotation move",
 			rotation => $rotation));
 	}
-	$rot_layer eq lc $rot_layer;
 
-	return $move if $rot_layer eq $move_layer;
+	return $move if $rot_layer == $move_layer;
 
-	my $layer = "xyz";
+	my $layer = "012";
 	$layer =~ s/$move_layer//;
 	$layer =~ s/$rot_layer//;
-	my $width = $self->{"__${layer}width"};
+	my @layers = qw(x y z);
+	my $layer_id = chr($layer + ord 'x');
+	my $width = $self->{"__${layer_id}width"};
 
 	if ($rot_turns == 2) {
 		my $turns = 4 - $move_turns;
 		my $coord = $width + 1 - $move_coord;
-		my $rotated_internal_move = "$coord$move_layer$turns";
+		my $move_layer_id = chr($move_layer + ord 'x');
+		my $rotated_internal_move = "$coord$move_layer_id$turns";
 
 		my @rotated_moves = eval {
 			$self->{__notation}->translate($rotated_internal_move, $self);
@@ -728,34 +730,33 @@ sub rotateMove {
 	# The key is the roation axis, the inner key the layer that moves.
 	# Do the coordinate or the number of turns change if we rotate by
 	# 90 degrees in clock-wise direction?
-	my %transform = (
-		x => {
-			y => {
+	my @transform = (
+		[
+			undef,
+			{
 				coord => 1,
 			},
-			z => {
+			{
 				turns => 1,
 			}
-		},
-		y => {
-			x => {
+		],
+		[
+			{
 				coord => 1,
 				turns => 1,
 			},
-			z => {
-			}
-		},
-		z => {
-			x => {
+		],
+		[
+			{
 				coord => 1,
 			},
-			y => {
+			{
 				turns => 3,
 			},
-		}
+		],
 	);
 	my ($coord, $turns);
-	my $transformer = $transform{$rot_layer}->{$move_layer};
+	my $transformer = $transform[$rot_layer]->[$move_layer];
 	if (1 == $rot_turns) {
 		$coord = $transformer->{coord} ? $width + 1 - $move_coord : $move_coord;
 		$turns = $transformer->{turns} ? 4 - $move_turns : $move_turns;
@@ -766,12 +767,13 @@ sub rotateMove {
 
 	$move_width = '' if 1 == $move_width;
 
-	my $rotated_internal_move = "$coord$layer$move_width$turns";
+	die if $layer_id ne chr($layer + ord('x'));
+	my $rotated_internal_move = "$coord$layer_id$move_width$turns";
 	my @rotated_moves = eval {
 		$self->{__notation}->translate($rotated_internal_move, $self);
 	};
 	if ($@) {
-		die(__x("notation cannot translat rotated_move '{rotated_move}'",
+		die(__x("notation cannot translate rotated_move '{rotated_move}'",
 			rotated_move => $rotated_internal_move));
 	}
 
@@ -803,7 +805,7 @@ sub parseInternalMove {
 	return if $move !~ /^(0|(?:[1-9][0-9]*))([xyzXYZ])([1-9][0-9]*)?([123])$/;
 
 	my ($coord, $layer, $width, $turns) = ($1, $2, $3, $4);
-	$layer = lc $layer;
+	$layer = ord(lc $layer) - ord('x');
 
 	$width //= 1;
 

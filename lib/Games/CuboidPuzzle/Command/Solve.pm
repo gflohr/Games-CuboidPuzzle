@@ -56,7 +56,7 @@ sub _run {
 	my @solves = $solver->solve($cube);
 
 	foreach my $solve (@solves) {
-		say join ' ', map { $cube->translateMove($_) } @$solve;
+		say join ' ', @$solve;
 	}
 
 	return $self;

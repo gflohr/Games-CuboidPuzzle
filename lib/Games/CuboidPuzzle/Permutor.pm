@@ -77,7 +77,8 @@ sub __doPermute {
 sub translatePath {
 	my ($self, $path) = @_;
 
-	return join ' ', map { $self->translateMove($_) } @$path;
+	my @solve = map { $self->translateMove($_) } @$path;
+	return wantarray ? @solve : join ' ', @solve;
 }
 
 sub translateMove {
@@ -85,7 +86,8 @@ sub translateMove {
 
 	my ($coord, $layer, $width, $turns) = @$move;
 	$width = '' if 1 == $width;
-	return $self->{__cube}->translateMove("$coord$layer$width$turns");
+	my $layer_id = chr($layer + ord('x'));
+	return $self->{__cube}->translateMove("$coord$layer_id$width$turns");
 }
 
 1;
