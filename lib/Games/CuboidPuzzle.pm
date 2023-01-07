@@ -745,36 +745,58 @@ sub rotateMove {
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
+	my $rotated_internal_move =
+		eval { $self->__rotateInternalMove($internal_move, $move, $rotation) };
+	if ($@) {
+		require Carp;
+		my $x = $@;
+		chomp $x;
+		Carp::croak($x);
+	}
+
+	my @rotated_moves = eval {
+		$self->{__notation}->translate($rotated_internal_move, $self);
+	};
+	if ($@) {
+		die(__x("notation cannot translate rotated_move '{rotated_move}'",
+			rotated_move => $rotated_internal_move));
+	}
+
+	return @rotated_moves;
+}
+
+sub __rotateInternalMove {
+	my ($self, $internal_move, $move, $rotation) = @_;
+
 	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseInternalMove($internal_move);
 	if (!defined $move_coord) {
-		require Carp;
-		Carp::croak(__x("invalid move '{move}'", move => $move));
+		die __x("invalid move '{move}'\n", move => $move);
 	}
 
 	my $internal_rotation = $self->parseMove($rotation);
 	if (!defined $internal_rotation) {
-		require Carp;
-		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
+		die __x("invalid rotation '{rotation}'\n", rotation => $rotation);
 	}
 
 	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseInternalMove($internal_rotation);
 	if (!defined $rot_coord) {
-		require Carp;
-		Carp::croak(__x("invalid rotation '{rotation}'", rotation => $rotation));
+		die __x("invalid rotation '{rotation}'\n", rotation => $rotation);
 	}
 
 	if ($rot_coord != 0) {
-		require Carp;
-		Carp::croak(__x("rotation '{rotation}' is not a rotation move",
-			rotation => $rotation));
+		die __x("rotation '{rotation}' is not a rotation move\n",
+			rotation => $rotation);
 	}
 
-	return $move if $rot_layer == $move_layer;
+	if ($rot_layer == $move_layer) {
+		$move_width = '' if 1 == $move_width;
+		$move_layer = chr($move_layer + ord 'x');
+		return "$move_coord$move_layer$move_width$move_turns";
+	}
 
 	my $layer = "012";
 	$layer =~ s/$move_layer//;
 	$layer =~ s/$rot_layer//;
-	my @layers = qw(x y z);
 	my $layer_id = chr($layer + ord 'x');
 	my $width = $self->{"__${layer_id}width"};
 
@@ -782,17 +804,9 @@ sub rotateMove {
 		my $turns = 4 - $move_turns;
 		my $coord = $width + 1 - $move_coord;
 		my $move_layer_id = chr($move_layer + ord 'x');
-		my $rotated_internal_move = "$coord$move_layer_id$turns";
+		$move_width = '' if 1 == $move_width;
 
-		my @rotated_moves = eval {
-			$self->{__notation}->translate($rotated_internal_move, $self);
-		};
-		if ($@) {
-			die(__x("notation cannot translat rotated_move '{rotated_move}'",
-				rotated_move => $rotated_internal_move));
-		}
-
-		return @rotated_moves;
+		return "$coord$move_layer_id$move_width$turns";
 	}
 
 	# The key is the roation axis, the inner key the layer that moves.
@@ -836,16 +850,32 @@ sub rotateMove {
 	$move_width = '' if 1 == $move_width;
 
 	die if $layer_id ne chr($layer + ord('x'));
-	my $rotated_internal_move = "$coord$layer_id$move_width$turns";
-	my @rotated_moves = eval {
-		$self->{__notation}->translate($rotated_internal_move, $self);
-	};
-	if ($@) {
-		die(__x("notation cannot translate rotated_move '{rotated_move}'",
-			rotated_move => $rotated_internal_move));
+
+	return "$coord$layer_id$move_width$turns";
+}
+
+sub rotateMovesToBottom {
+	my ($self, $color, @moves) = @_;
+
+	my $layer = $self->findLayer($color);
+	if (!defined $layer && $layer !~ /^[0..5]$/) {
+		require Carp;
+		Carp::croak(__x("cube has no layer with color '{color}'",
+		                color => $color));
 	}
 
-	return @rotated_moves;
+	my @internal_moves = map { $self->parseMove($_) } @moves;
+	my @rotated_moves;
+	if ($layer != 2) {
+		my @bottom_rotations = ('0y1', '0x3', undef, '0x1', '0x2', '0y3');
+		foreach my $move (@moves) {
+		}
+	} else {
+		@rotated_moves = @internal_moves;
+	}
+
+	use Data::Dumper;
+	warn Dumper \@internal_moves;
 }
 
 sub render {
@@ -909,7 +939,8 @@ sub findLayer {
 			Carp::croak("layer {layer} has an even number of columns",
 				layer => $layer);
 		}
-		return $layer if $stickers[$#stickers >> 1] eq $color;
+		my $index = $stickers[$#stickers >> 1];
+		return $layer if $self->{__state}->[$index] eq $color;
 	}
 
 	return;
