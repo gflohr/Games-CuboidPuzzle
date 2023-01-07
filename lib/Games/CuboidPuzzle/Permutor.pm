@@ -28,25 +28,86 @@ sub new {
 	my $self = {
 		__cube => $cube,
 		__supported => \%supported_internal,
+		__skip_duplicates => 1,
 	};
 
 	bless $self, $class;
 }
 
+sub skipDuplicates {
+	my ($self, $value) = @_;
+
+	if (@_ == 2) {
+		$self->{__skip_duplicates} = $value;
+	}
+
+	return $self->{__skip_duplicates};
+}
+
 sub permute {
 	my ($self, $max_depth, $callback) = @_;
 
-	$self->__doPermute(1, $max_depth, [], $callback);
+	local $";
+	my $state = "@{$self->{__cube}->{__state}}";
+	my %seen = ($state => 'initial');
+	$self->__doPermute(1, $max_depth, [], $callback, \%seen);
+
+	return $self;
+}
+
+sub __permuteFirst {
+	my ($self, $max_depth, $path, $callback, $seen) = @_;
+
+	my $depth = 1;
+
+	local $";
+	my $cube = $self->{__cube};
+	my $done;
+	my $skip_duplicates = $self->{__skip_duplicates};
+	foreach my $move (sort keys %{$self->{__supported}}) {
+		my ($coord, $layer, $turns) = @{$self->{__supported}->{$move}};
+		# Special for finding interesting last layer moves.
+		next if $coord != 1;
+		next if $layer != 0;
+
+		if (@$path) {
+			my $last = $path->[-1];
+			if ($last->[0] == $coord && $last->[1] eq $layer) {
+				next;
+			}
+		}
+
+		push @$path, [$coord, $layer, 1, $turns];
+		$cube->ultraFastMove($coord, $layer, 1, $turns);
+
+		my $state = "@{$cube->{__state}}";
+		if (!$skip_duplicates || !exists $seen->{$state} || $seen->{$state} > $depth) {
+			$seen->{$state} = $depth;
+			if ($depth == $max_depth) {
+				$callback->($path) or $done = 1;
+			} else {
+				$self->__doPermute($depth + 1, $max_depth, $path, $callback, $seen)
+					or $done = 1;
+			}
+		}
+
+		pop @$path;
+		$cube->fastMove($coord, $layer, 1, 4 - $turns);
+
+		return if $done;
+	}
 
 	return $self;
 }
 
 sub __doPermute {
-	my ($self, $depth, $max_depth, $path, $callback) = @_;
+	my ($self, $depth, $max_depth, $path, $callback, $seen) = @_;
 
+	local $";
 	my $cube = $self->{__cube};
 	my $done;
-	foreach my $move (keys %{$self->{__supported}}) {
+	my $skip_duplicates = $self->{__skip_duplicates};
+	foreach my $move (sort keys %{$self->{__supported}}) {
 		my ($coord, $layer, $turns) = @{$self->{__supported}->{$move}};
 		if (@$path) {
 			my $last = $path->[-1];
@@ -58,11 +119,15 @@ sub __doPermute {
 		push @$path, [$coord, $layer, 1, $turns];
 		$cube->ultraFastMove($coord, $layer, 1, $turns);
 
-		if ($depth == $max_depth) {
-			$callback->($path) or $done = 1;
-		} else {
-			$self->__doPermute($depth + 1, $max_depth, $path, $callback)
-				or $done = 1;
+		my $state = "@{$cube->{__state}}";
+		if (!$skip_duplicates || !exists $seen->{$state} || $seen->{$state} > $depth) {
+			$seen->{$state} = $depth;
+			if ($depth == $max_depth) {
+				$callback->($path) or $done = 1;
+			} else {
+				$self->__doPermute($depth + 1, $max_depth, $path, $callback, $seen)
+					or $done = 1;
+			}
 		}
 
 		pop @$path;
