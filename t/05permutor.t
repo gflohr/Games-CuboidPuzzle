@@ -27,7 +27,7 @@ ok $cube->conditionSolved, "solved after depth 1";
 
 $count = 0;
 $p->permute(2, sub { ++$count; return 1 });
-is $count, 27 * (27 - 3), "depth 2";
+is $count, 564, "depth 2";
 ok $cube->conditionSolved, "solved after depth 2";
 
 done_testing;
