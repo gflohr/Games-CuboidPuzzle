@@ -15,7 +15,7 @@ use strict;
 use v5.10;
 
 sub new {
-	my ($class, $cube) = @_;
+	my ($class, $cube, @first_moves) = @_;
 
 	my @supported = $cube->supportedMoves;
 	my %supported_internal;
@@ -25,9 +25,21 @@ sub new {
 		next if 0 == $coord; # Cube rotation.
 		$supported_internal{$internal} = [$coord, $layer, $turns];
 	}
+
+	my %first_internal;
+	if (@first_moves) {
+		foreach my $move (@first_moves) {
+			my $internal = $cube->parseMove($move);
+			my ($coord, $layer, $width, $turns) = $cube->parseInternalMove($internal);
+			$first_internal{$internal} = [$coord, $layer, $turns];
+		}
+	} else {
+		%first_internal = %supported_internal;
+	}
 	my $self = {
 		__cube => $cube,
 		__supported => \%supported_internal,
+		__first => \%first_internal,
 		__skip_duplicates => 1,
 	};
 
@@ -50,7 +62,7 @@ sub permute {
 	local $";
 	my $state = "@{$self->{__cube}->{__state}}";
 	my %seen = ($state => 'initial');
-	$self->__doPermute(1, $max_depth, [], $callback, \%seen);
+	$self->__permuteFirst($max_depth, [], $callback, \%seen);
 
 	return $self;
 }
@@ -64,11 +76,8 @@ sub __permuteFirst {
 	my $cube = $self->{__cube};
 	my $done;
 	my $skip_duplicates = $self->{__skip_duplicates};
-	foreach my $move (sort keys %{$self->{__supported}}) {
-		my ($coord, $layer, $turns) = @{$self->{__supported}->{$move}};
-		# Special for finding interesting last layer moves.
-		next if $coord != 1;
-		next if $layer != 0;
+	foreach my $move (sort keys %{$self->{__first}}) {
+		my ($coord, $layer, $turns) = @{$self->{__first}->{$move}};
 
 		if (@$path) {
 			my $last = $path->[-1];
