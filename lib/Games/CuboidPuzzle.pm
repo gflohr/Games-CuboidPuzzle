@@ -745,8 +745,18 @@ sub rotateMove {
 		Carp::croak(__x("invalid move '{move}'", move => $move));
 	}
 
-	my $rotated_internal_move =
-		eval { $self->__rotateInternalMove($internal_move, $move, $rotation) };
+	my $internal_rotation = $self->parseMove($rotation);
+	if (!defined $internal_rotation) {
+		require Carp;
+		Carp::croak(__x("invalid rotation '{rotation}'\n", rotation => $rotation));
+	}
+
+	my $rotated_internal_move = eval {
+		$self->__rotateInternalMove(
+			$internal_move, $move,
+			$internal_rotation, $rotation
+		);
+	};
 	if ($@) {
 		require Carp;
 		my $x = $@;
@@ -766,16 +776,11 @@ sub rotateMove {
 }
 
 sub __rotateInternalMove {
-	my ($self, $internal_move, $move, $rotation) = @_;
+	my ($self, $internal_move, $move, $internal_rotation, $rotation) = @_;
 
 	my ($move_coord, $move_layer, $move_width, $move_turns) = $self->parseInternalMove($internal_move);
 	if (!defined $move_coord) {
 		die __x("invalid move '{move}'\n", move => $move);
-	}
-
-	my $internal_rotation = $self->parseMove($rotation);
-	if (!defined $internal_rotation) {
-		die __x("invalid rotation '{rotation}'\n", rotation => $rotation);
 	}
 
 	my ($rot_coord, $rot_layer, $rot_width, $rot_turns) = $self->parseInternalMove($internal_rotation);
@@ -868,7 +873,10 @@ sub rotateMovesToBottom {
 	my @rotated_moves;
 	if ($layer != 2) {
 		my @bottom_rotations = ('0y1', '0x3', undef, '0x1', '0x2', '0y3');
-		foreach my $move (@moves) {
+		foreach my $i (0 .. $#internal_moves) {
+			my $internal_move = $internal_moves[$i];
+			my $move = $moves[$i];
+			my $rotated_internal_move = $self->__rotateInternalMove($internal_move, $move);
 		}
 	} else {
 		@rotated_moves = @internal_moves;
