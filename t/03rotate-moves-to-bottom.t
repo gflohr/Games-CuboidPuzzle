@@ -16,7 +16,9 @@ use List::Util qw(pairs);
 use Games::CuboidPuzzle;
 
 my @tests = (
-	["F", "W", "B"],
+	["F", "W", "x2 B"],
+	["R U R' U'", "B", "x R B R' B'"],
+	#["R S", "O", "z' U S z'"]
 );
 
 my $cube = Games::CuboidPuzzle->new;
@@ -29,7 +31,7 @@ foreach my $test (@tests) {
 	my @wanted = split / +/, $wanted;
 	is_deeply \@got, \@wanted, "'$moves' rotated to face '$color'";
 	ok $cube->conditionSolved,
-		"cube solved again after '$moves' rotate to fae '$color'";
+		"cube solved again after '$moves' rotate to face '$color'";
 }
 
 done_testing;

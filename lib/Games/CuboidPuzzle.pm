@@ -872,18 +872,25 @@ sub rotateMovesToBottom {
 	my @internal_moves = map { $self->parseMove($_) } @moves;
 	my @rotated_moves;
 	if ($layer != 2) {
-		my @bottom_rotations = ('0y1', '0x3', undef, '0x1', '0x2', '0y3');
+		my @rotations = ('0x1', '0y3', undef, '0y1', '0x2', '0x3');
+		my $internal_rotation = $rotations[$layer];
+		my $rotation = $self->{__notation}->translate($internal_rotation, $self);
+		push @rotated_moves, $internal_rotation;
 		foreach my $i (0 .. $#internal_moves) {
 			my $internal_move = $internal_moves[$i];
 			my $move = $moves[$i];
-			my $rotated_internal_move = $self->__rotateInternalMove($internal_move, $move);
+			my $rotated_internal_move =
+				$self->__rotateInternalMove(
+					$internal_move, $move,
+					$internal_rotation, $rotation,
+				);
+			push @rotated_moves, $rotated_internal_move;
 		}
 	} else {
 		@rotated_moves = @internal_moves;
 	}
 
-	use Data::Dumper;
-	warn Dumper \@internal_moves;
+	return map { $self->{__notation}->translate($_, $self) } @rotated_moves;
 }
 
 sub render {
