@@ -625,8 +625,10 @@ sub __setupLayerIndices {
 	my @layerIndices;
 	my @layerIndicesFlattened;
 	my @crossIndicesFlattened;
+	my @edgeIndicesFlattened;
 	foreach my $i (0 .. 5) {
 		my @rows;
+		my @edges;
 		# The layers are:
 		#   0
 		# 1 2 3 4
@@ -641,6 +643,30 @@ sub __setupLayerIndices {
 						push @cols, $i++;
 					}
 					push @rows, \@cols;
+
+					if ($xw > 2 && $yw > 2) {
+						my $i = $xw * $zw + 2 * $zw + $xw + 1;
+						$edges[0] = [$i .. $i + $xw - 3];
+						$i += 2 * ($xw + $zw);
+						push @{$edges[0]}, ($i .. $i + $xw - 3);
+
+						$i = $xw * $zw + $zw + 1;
+						$edges[2] = [$i .. $i + $xw - 3];
+						$i += 2 * ($xw + $zw);
+						push @{$edges[2]}, ($i .. $i + $xw - 3);
+					}
+					if ($zw > 2 && $yw > 2) {
+						my $i = $xw * $zw + $zw + $xw + 1;
+						$edges[1] = [$i .. $i + $zw - 3];
+						$i += 2 * ($xw + $zw);
+						push @{$edges[1]}, ($i .. $i + $zw - 3);
+
+						$edges[3] = [];
+						foreach my $col (1 .. $zw - 2) {
+							$i = $xw * $zw + ($col - 1) * 2 * ($xw + $zw) + 1;
+							push @{$edges[3]}, ($i .. $i + $zw - 3);
+						}
+					}
 				}
 			},
 			# Layer 1.
@@ -654,6 +680,26 @@ sub __setupLayerIndices {
 					}
 					push @rows, \@cols;
 				}
+
+				if ($zw > 2 && $xw > 2) {
+					$edges[0] = [];
+					foreach my $row (1 .. $zw - 2) {
+						my $i = $row * $xw;
+						push @{$edges[0]}, ($i, $i + 1);
+
+						$i = $xw * $zw + $yw * 2 * ($xw + $zw) + $row * $xw;
+						push @{$edges[2]}, ($i, $i + 1);
+					}
+				}
+				if ($yw > 2 && $xw > 2) {
+					foreach my $row (1 .. $yw - 2) {
+						my $i = $xw * $zw + $row * 2 * ($xw + $zw) + $zw;
+						push @{$edges[1]}, ($i, $i + 1);
+
+						$i = $xw * $zw + ($row + 1) * 2 * ($xw + $zw) - 2;
+						push @{$edges[3]}, ($i, $i + 1);
+					}
+				}
 			},
 			# Layer 2.
 			sub {
@@ -665,6 +711,26 @@ sub __setupLayerIndices {
 							+ $zw + $colno;
 					}
 					push @rows, \@cols;
+				}
+
+				if ($xw > 2 && $zw > 2) {
+					my $i = $xw * $zw - 2 * $xw + 1;
+					push @{$edges[0]}, ($i .. $i + $xw - 3);
+					push @{$edges[0]}, ($i + $xw .. $i + 2 * $xw - 3);
+
+					$i = $xw * $zw + $yw * 2 * ($xw + $zw) + 1;
+					push @{$edges[2]}, ($i .. $i + $xw - 3);
+					push @{$edges[2]}, ($i + $xw .. $i + 2 * $xw - 3);
+				}
+
+				if ($yw > 2 && $zw > 2) {
+					foreach my $row (1 .. $yw - 2) {
+						my $i = $xw * $zw + $row * 2 * ($xw + $zw) + $zw + $xw;
+						push @{$edges[1]}, ($i, $i + 1);
+
+						$i = $xw * $zw + $row * 2 * ($xw + $zw) + $zw - 2;
+						push @{$edges[3]}, ($i, $i + 1);
+					}
 				}
 			},
 			# Layer 3.
@@ -678,6 +744,26 @@ sub __setupLayerIndices {
 					}
 					push @rows, \@cols;
 				}
+
+				if ($zw > 2 && $xw > 2) {
+					foreach my $col (1 .. $zw - 2) {
+						my $i = $col * $xw + $xw - 2;
+						push @{$edges[0]}, ($i, $i + 1);
+
+						$i = $xw * $zw + $yw * 2 * ($xw + $zw) + $col * $xw + $xw - 2;
+						push @{$edges[2]}, ($i, $i + 1);
+					}
+				}
+
+				if ($yw > 2 && $xw > 2) {
+					foreach my $row (1 .. $yw - 2) {
+						my $i = $xw * $zw + $row * 2 * ($xw + $zw) + 2 * $zw + $xw;
+						push @{$edges[1]}, ($i, $i + 1);
+
+						$i = $xw * $zw + $row * 2 * ($xw + $zw) + $zw + $xw - 2;
+						push @{$edges[3]}, ($i, $i + 1);
+					}
+				}
 			},
 			# Layer 4.
 			sub {
@@ -690,6 +776,19 @@ sub __setupLayerIndices {
 					}
 					push @rows, \@cols;
 				}
+
+				if ($xw > 2 && $zw > 2) {
+					my $i = 1;
+					push @{$edges[0]}, ($i .. $xw - 2);
+					push @{$edges[0]}, ($i + $xw .. 2 * $xw - 2);
+				}
+
+				if ($yw > 2 && $zw > 2) {
+					foreach my $row (1 .. $yw - 2) {
+						my $i = $xw * $zw + $row * 2 * ($xw + $zw);
+						push @{$edges[1]}, ($i, $i + 1);
+					}
+				}
 			},
 			# Layer 5.
 			sub {
@@ -701,6 +800,26 @@ sub __setupLayerIndices {
 					}
 					push @rows, \@cols;
 				}
+
+				if ($xw > 2 && $yw > 2) {
+					my $i = $xw * $zw + $yw * 2 * ($xw + $zw) + 1;
+					push @{$edges[0]}, ($i .. $i + $xw - 3);
+					push @{$edges[0]}, ($i + $xw.. $i + 2 * $xw - 3);
+
+					$i = $xw * $zw + ($yw - 1) * 2 * ($xw + $zw) - $xw + 1;
+					push @{$edges[2]}, ($i .. $i + $xw - 3);
+					push @{$edges[2]}, ($i + 2 * ($xw + $zw) .. $i + $xw + 2 * ($xw + $zw) - 3);
+				}
+
+				if ($zw > 2 && $yw > 2) {
+					my $i = $xw * $zw + ($yw - 2) * 2 * ($xw + $zw) + $xw + $zw + 1;
+					push @{$edges[1]}, ($i .. $i + $zw - 3);
+					push @{$edges[1]}, ($i + 2 * ($xw + $zw) .. $i + 2 * ($xw + $zw) + $zw - 3);
+
+					$i = $xw * $zw + ($yw - 2) * 2 * ($xw + $zw) + 1;
+					push @{$edges[3]}, ($i .. $i + $zw - 3);
+					push @{$edges[3]}, ($i + 2 * ($xw + $zw) .. $i + 2 * ($xw + $zw) + $zw - 3);
+				}
 			},
 		);
 
@@ -709,6 +828,7 @@ sub __setupLayerIndices {
 		push @layerIndices, \@rows;
 		my @flattened = map { @$_ } @rows;
 		push @layerIndicesFlattened, \@flattened;
+		push @edgeIndicesFlattened, \@edges;
 
 		my @cross;
 		for (my $i = 1; $i < $#{$rows[0]}; ++$i) {
@@ -730,6 +850,7 @@ sub __setupLayerIndices {
 	$self->{__layerIndices} = \@layerIndices;
 	$self->{__layerIndicesFlattened} = \@layerIndicesFlattened;
 	$self->{__crossIndicesFlattened} = \@crossIndicesFlattened;
+	$self->{__edgeIndicesFlattened} = \@edgeIndicesFlattened;
 
 	return $self;
 }
