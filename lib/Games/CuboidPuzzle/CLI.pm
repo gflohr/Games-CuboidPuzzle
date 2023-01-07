@@ -17,6 +17,14 @@ use IO::Handle;
 use Locale::TextDomain 'Games-CuboidPuzzle';
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
+my %global_options = (
+	notation => 'n|notation=s',
+	quiet => 'q|quiet',
+	help => 'h|help',
+	verbose => 'v|verbose',
+	version => 'V|version',
+);
+
 sub new {
 	my ($class, $argv) = @_;
 
@@ -60,12 +68,11 @@ sub dispatch {
 			$self->usageError(shift);
 		};
 
-		GetOptionsFromArray($self->{__global_options},
-			'q|quiet' => \$options{quiet},
-			'h|help' => \$options{help},
-			'v|verbose' => \$options{verbose},
-			'V|version' => \$options{version},
-		);
+		my %optspec;
+		foreach my $name (keys %global_options) {
+			$optspec{$global_options{$name}} = \$options{$name};
+		}
+		GetOptionsFromArray($self->{__global_options}, %optspec);
 	}
 
 	$self->displayUsage if $options{help};
@@ -115,6 +122,11 @@ Mandatory arguments to long options, are mandatory to short options, too.
 EOF
 
 	$msg .= "\n";
+
+	$msg .= __<<EOF;
+Global options:
+  -n, --notation=NOTATION     use notation NOTATION (default Conventional)
+EOF
 
 	$msg .= __<<EOF;
 The following commands are currently supported:
