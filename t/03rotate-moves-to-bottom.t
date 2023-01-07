@@ -16,9 +16,9 @@ use List::Util qw(pairs);
 use Games::CuboidPuzzle;
 
 my @tests = (
-	["F", "W", "x2 B"],
-	["R U R' U'", "B", "x R B R' B'"],
-	#["R S", "O", "z' U S z'"]
+	["F", "W", "x2 y R"],
+	["R U R' U'", "B", "x y F R F' R'"],
+	["R S", "O", "z' y U M z'"]
 );
 
 my $cube = Games::CuboidPuzzle->new;

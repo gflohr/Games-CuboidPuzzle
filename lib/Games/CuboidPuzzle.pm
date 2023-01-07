@@ -869,28 +869,55 @@ sub rotateMovesToBottom {
 		                color => $color));
 	}
 
-	# Which internal move rotates a layer to the bottom.
+	# Which internal moves rotate a layer to the bottom.
 	my @bottom_rotations = ('0x1', '0y3', undef, '0y1', '0x2', '0x3');
 	my @internal_moves = map { $self->parseMove($_) } @moves;
 	my @rotated_moves;
 	if ($layer != 2) {
 		my $internal_rotation = $bottom_rotations[$layer];
-		my $rotation = $self->{__notation}->translate($internal_rotation, $self);
-		push @rotated_moves, $internal_rotation;
-		foreach my $i (0 .. $#internal_moves) {
-			my $internal_move = $internal_moves[$i];
-			my $move = $moves[$i];
-			my $rotated_internal_move =
-				$self->__rotateInternalMove(
-					$internal_move, $move,
-					$internal_rotation, $rotation,
-				);
-			push @rotated_moves, $rotated_internal_move;
+		my $max_bonus = -1;
+		foreach my $second_rotation (undef, '0z1', '0z3', '0z2') {
+			my @try;
+			foreach my $i (0 .. $#internal_moves) {
+				my $internal_move = $internal_moves[$i];
+				my $rotated_internal_move =
+					$self->__rotateInternalMove(
+						$internal_move, '?',
+						$internal_rotation, '?',
+					);
+				push @try, $rotated_internal_move;
+			}
+			if (defined $second_rotation) {
+				foreach my $i (0 .. $#try) {
+					my $internal_move = $try[$i];
+					my $rotated_internal_move =
+						$self->__rotateInternalMove(
+							$internal_move, '?',
+							$second_rotation, '?',
+						);
+					@try[$i] = $rotated_internal_move;
+				}
+			}
+
+			my $bonus = 0;
+			foreach my $move (@try) {
+				if ($move =~ /x/) {
+					$bonus += 2;
+				} elsif ($move =~ /1y/) {
+					++$bonus;
+				}
+			}
+			if ($bonus > $max_bonus) {
+				@rotated_moves = ($internal_rotation);
+				push @rotated_moves, $second_rotation
+					if defined $second_rotation;
+				push @rotated_moves, @try;
+				$max_bonus = $bonus;
+			}
 		}
 	} else {
 		@rotated_moves = @internal_moves;
 	}
-
 
 	my @parsed_rotated_moves = map {
 		[$self->parseInternalMove($_)]
