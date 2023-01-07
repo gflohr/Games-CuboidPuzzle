@@ -869,11 +869,12 @@ sub rotateMovesToBottom {
 		                color => $color));
 	}
 
+	# Which internal move rotates a layer to the bottom.
+	my @bottom_rotations = ('0x1', '0y3', undef, '0y1', '0x2', '0x3');
 	my @internal_moves = map { $self->parseMove($_) } @moves;
 	my @rotated_moves;
 	if ($layer != 2) {
-		my @rotations = ('0x1', '0y3', undef, '0y1', '0x2', '0x3');
-		my $internal_rotation = $rotations[$layer];
+		my $internal_rotation = $bottom_rotations[$layer];
 		my $rotation = $self->{__notation}->translate($internal_rotation, $self);
 		push @rotated_moves, $internal_rotation;
 		foreach my $i (0 .. $#internal_moves) {
@@ -889,6 +890,32 @@ sub rotateMovesToBottom {
 	} else {
 		@rotated_moves = @internal_moves;
 	}
+
+
+	my @parsed_rotated_moves = map {
+		[$self->parseInternalMove($_)]
+	} @rotated_moves;
+
+	my @parsed_moves = map { [$self->parseInternalMove($_)] } @rotated_moves;
+	foreach my $move (@parsed_moves) {
+		$self->ultraFastMove(@$move);
+	}
+
+	my $new_layer = $self->findLayer($color);
+	my @final_rotations;
+	if ($new_layer != 2) {
+		# Slice moves implicitely rotate the cube.
+		my $internal_rotation = $bottom_rotations[$layer];
+		push @final_rotations, $internal_rotation;
+	}
+
+	# Revert.
+	foreach my $move (reverse @parsed_moves) {
+		$move->[3] = 4 - $move->[3];
+		$self->ultraFastMove(@$move);
+	}
+
+	push @rotated_moves, @final_rotations;
 
 	return map { $self->{__notation}->translate($_, $self) } @rotated_moves;
 }
