@@ -108,6 +108,14 @@ sub __setupMoves {
 
 	$self->{__shifts} = [[], [], []];
 
+	$self->{__adjacentFaces} = [
+		[1, 2, 3, 4],
+		[0, 2, 4, 5],
+		[0, 1, 3, 5],
+		[0, 2, 4, 5],
+		[0, 1, 3, 5],
+		[1, 2, 3, 4],
+	];
 	$self->__setupLayerIndices;
 	$self->__setupXMoves;
 	$self->__setupYMoves;
@@ -643,30 +651,30 @@ sub __setupLayerIndices {
 						push @cols, $i++;
 					}
 					push @rows, \@cols;
+				}
 
-					if ($xw > 2 && $yw > 2) {
-						my $i = $xw * $zw + 2 * $zw + $xw + 1;
-						$edges[0] = [$i .. $i + $xw - 3];
-						$i += 2 * ($xw + $zw);
-						push @{$edges[0]}, ($i .. $i + $xw - 3);
+				if ($xw > 2 && $yw > 2) {
+					my $i = $xw * $zw + 2 * $zw + $xw + 1;
+					$edges[0] = [$i .. $i + $xw - 3];
+					$i += 2 * ($xw + $zw);
+					push @{$edges[0]}, ($i .. $i + $xw - 3);
 
-						$i = $xw * $zw + $zw + 1;
-						$edges[2] = [$i .. $i + $xw - 3];
-						$i += 2 * ($xw + $zw);
-						push @{$edges[2]}, ($i .. $i + $xw - 3);
-					}
-					if ($zw > 2 && $yw > 2) {
-						my $i = $xw * $zw + $zw + $xw + 1;
-						$edges[1] = [$i .. $i + $zw - 3];
-						$i += 2 * ($xw + $zw);
-						push @{$edges[1]}, ($i .. $i + $zw - 3);
+					$i = $xw * $zw + $zw + 1;
+					$edges[2] = [$i .. $i + $xw - 3];
+					$i += 2 * ($xw + $zw);
+					push @{$edges[2]}, ($i .. $i + $xw - 3);
+				}
 
-						$edges[3] = [];
-						foreach my $col (1 .. $zw - 2) {
-							$i = $xw * $zw + ($col - 1) * 2 * ($xw + $zw) + 1;
-							push @{$edges[3]}, ($i .. $i + $zw - 3);
-						}
-					}
+				if ($zw > 2 && $yw > 2) {
+					my $i = $xw * $zw + $zw + $xw + 1;
+					$edges[1] = [$i .. $i + $zw - 3];
+					$i += 2 * ($xw + $zw);
+					push @{$edges[1]}, ($i .. $i + $zw - 3);
+
+					$i = $xw * $zw + 1;
+					push @{$edges[3]}, ($i .. $i + $zw - 3);
+					$i += 2 * ($xw + $zw);
+					push @{$edges[3]}, ($i .. $i + $zw - 3);
 				}
 			},
 			# Layer 1.
@@ -781,12 +789,20 @@ sub __setupLayerIndices {
 					my $i = 1;
 					push @{$edges[0]}, ($i .. $xw - 2);
 					push @{$edges[0]}, ($i + $xw .. 2 * $xw - 2);
+
+					$i = $xw * $zw + $yw * 2 * ($xw + $zw) + ($zw - 2) * $xw + 1;
+					push @{$edges[2]}, ($i .. $i + $xw - 3);
+					$i += $xw;
+					push @{$edges[2]}, ($i .. $i + $xw - 3);
 				}
 
 				if ($yw > 2 && $zw > 2) {
 					foreach my $row (1 .. $yw - 2) {
 						my $i = $xw * $zw + $row * 2 * ($xw + $zw);
 						push @{$edges[1]}, ($i, $i + 1);
+
+						$i = $xw * $zw + $row * 2 * ($xw + $zw) + $xw + $zw;
+						push @{$edges[3]}, ($i, $i + 1);
 					}
 				}
 			},
@@ -1141,21 +1157,37 @@ sub conditionCrossSolved {
 
 	my $crossIndicesFlattened = $self->{__crossIndicesFlattened}->[$layer];
 	my @colors = uniq @{$self->{__state}}[@$crossIndicesFlattened];
-	return $self if 0 == $#colors;
+	return if $#colors;
 
-	return;
+	# Check the edges. It is enough to check 3 sides because the 4th must be
+	# solved if the other 3 are okay.
+	my $edge_indices = $self->{__edgeIndicesFlattened}->[$layer];
+	foreach my $face (0 .. 2) {
+		@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+		return if $#colors;
+	}
+
+	return $self;
 }
 
 sub conditionAnyCrossSolved {
 	my ($self) = @_;
 
 	my $crossIndicesFlattened = $self->{__crossIndicesFlattened};
-	foreach my $i (0 .. 5) {
+	LAYER: foreach my $i (0 .. 5) {
 		my @colors = uniq @{$self->{__state}}[@{$crossIndicesFlattened->[$i]}];
-		return if $#colors;
+		next if $#colors;
+
+		my $edge_indices = $self->{__edgeIndicesFlattened}->[$i];
+		foreach my $face (0 .. 2) {
+			@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+			next LAYER if $#colors;
+		}
+
+		return $self;
 	}
 
-	return $self;
+	return;
 }
 
 sub translateMove {

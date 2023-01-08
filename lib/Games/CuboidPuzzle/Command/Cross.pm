@@ -22,10 +22,11 @@ use base qw(Games::CuboidPuzzle::Command);
 use Games::CuboidPuzzle;
 use Games::CuboidPuzzle::Permutor;
 
-sub _getDefaults { }
+sub _getDefaults { rotate => 1 }
 
 sub _getOptionSpecs {
 	color => 'c|color=s',
+	rotate => 'rotate!',
 }
 
 sub _run {
@@ -69,9 +70,12 @@ sub _run {
 
 	foreach my $color (sort keys %solves) {
 		foreach my $solve (sort @{$solves{$color}}) {
+			my @solve = @$solve;
+			@solve = $cube->rotateMovesToBottom($color, @solve)
+				if $options{rotate};
 			say __x("color {color}: {solve}",
 				color => $color,
-				solve => join ' ', @$solve,
+				solve => join ' ', @solve,
 			);
 		}
 	}
@@ -99,12 +103,18 @@ sub __solveAnyCross {
 		$p->permute($depth, sub {
 			my ($path) = @_;
 
-			foreach my $i (0 .. 5) {
-				my @colors = uniq @{$cube->{__state}}[@{$crossIndicesFlattened[$i]}];
-				if (@colors == 1) {
-					push @solves, [$p->translatePath($path)];
-					last;
+			LAYER: foreach my $i (0 .. 5) {
+				my @colors = uniq @{$self->{__state}}[@{$crossIndicesFlattened[$i]}];
+				next LAYER if $#colors;
+
+				my $edge_indices = $self->{__edgeIndicesFlattened}->[$i];
+				foreach my $face (0 .. 2) {
+					@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+					next LAYER if $#colors;
 				}
+
+				push @solves, [$p->translatePath($path)];
+				last LAYER;
 			}
 
 			return 1;
@@ -119,12 +129,18 @@ sub __solveAnyCross {
 sub __solveCross {
 	my ($self, $cube, %options) = @_;
 
+	my $color = $options{color};
+	my $layer = $cube->findLayer($color)
+		or Games::CuboidPuzzle::CLI->commandUsageError(cross
+			=> __x("this cube has no color '{color}'", color => $color));
+
 	if ($cube->conditionCrossSolved($options{color})) {
-		Games::CuboidPuzzle::CLI->commandUsageError(solve
+		Games::CuboidPuzzle::CLI->commandUsageError(cross
 			=> __"this cross is already solved on this cube");
 	}
 
-	my @crossIndicesFlattened = map { [$cube->crossIndicesFlattened($_)] } (0 .. 5);
+	my @crossIndicesFlattened = $cube->crossIndicesFlattened($layer);
+	my $edge_indices = $cube->{__edgeIndicesFlattened}->[$layer];
 
 	my @solves;
 	my $depth = 0;
@@ -136,13 +152,15 @@ sub __solveCross {
 		$p->permute($depth, sub {
 			my ($path) = @_;
 
-			foreach my $i (0 .. 5) {
-				my @colors = uniq @{$cube->{__state}}[@{$crossIndicesFlattened[$i]}];
-				if (@colors == 1 && $colors[0] eq $options{color}) {
-					push @solves, [$p->translatePath($path)];
-					last;
-				}
+			my @colors = uniq @{$cube->{__state}}[@crossIndicesFlattened];
+			return 1 if $#colors;
+
+			foreach my $face (0 .. 2) {
+				@colors = uniq @{$cube->{__state}}[@{$edge_indices->[$face]}];
+				return 1 if $#colors;
 			}
+
+			push @solves, [$p->translatePath($path)];
 
 			return 1;
 		});
@@ -157,27 +175,42 @@ sub __solveCross {
 
 =head1 NAME
 
-cuboid solve - Show solution to a scrambled
+cuboid cross - Find solution to solve a cross
 
 =head1 SYNOPSIS
 
-    cuboid solve [<global options>] [--solver=SOLVER] MOVES...
+    cuboid cross [<global options>] [--color=COLOR] MOVES...
 
 =head1 DESCRIPTION
 
-The command applies B<MOVES> to the specified cube and then tries to solve it
-using the specified strategy.
+The command applies B<MOVES> to the specified cube and then tries to solve
+a cross.
 
 Each move argument is automatically split at spaces and tabs.  As a convenience,
 you may replace the single quote character "'" with the lowercase letter i.
+
+The cross must have all adjacent edges oriented and at the correct position.
 
 =head1 OPTIONS
 
 =over 4
 
-=item -s, --solver=SOLVER
+=item -c, --colour=COLOUR, --color=COLOR
 
-Use the specified solver, defaults to C<BRUTE_FORCE>.
+Try to solve only the cross of colour COLOuR (usually one of W, Y, R, O, G, or B).
+
+Note that sometimes the same sequence of moves solves multiple crosses.  In
+such cases, all solutions will be displayed, not only the one for the
+specified colour.
+
+=item --rotate
+
+Rotate the cube so that the solved colour is at the bottom.  This is the default
+behaviour.
+
+=item --no-rotate
+
+Do not rotate the cube.
 
 =item -h, --help
 
