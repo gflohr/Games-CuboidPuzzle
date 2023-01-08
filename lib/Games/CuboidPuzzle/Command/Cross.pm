@@ -25,7 +25,7 @@ use Games::CuboidPuzzle::Permutor;
 sub _getDefaults { rotate => 1 }
 
 sub _getOptionSpecs {
-	color => 'c|color=s',
+	colour => 'c|colour=s|color=s',
 	rotate => 'rotate!',
 }
 
@@ -39,16 +39,16 @@ sub _run {
 		$cube->move($move);
 	}
 
-	if (defined $options{color}) {
-		my @exists = grep { $_ eq $options{color} } $cube->state;
+	if (defined $options{colour}) {
+		my @exists = grep { $_ eq $options{colour} } $cube->state;
 		if (!@exists) {
 			Games::CuboidPuzzle::CLI->commandUsageError(
-				__x("cube has no color '{color}'",
-					color => $options{color}));
+				__x("cube has no colour '{colour}'",
+					colour => $options{colour}));
 		}
 	}
 
-	my @solves = defined $options{color} ?
+	my @solves = defined $options{colour} ?
 		$self->__solveCross($cube, %options)
 		: $self->__solveAnyCross($cube, %options);
 
@@ -59,22 +59,22 @@ sub _run {
 			next if !$cube->conditionCrossSolved($layer);
 			my @crossIndices = $cube->crossIndicesFlattened($layer);
 			my @state = $cube->state;
-			my @crossColors = @state[@crossIndices];
-			my $color = $crossColors[0];
-			$solves{$color} ||= [];
-			push @{$solves{$color}}, $solve;
+			my @crossColours = @state[@crossIndices];
+			my $colour = $crossColours[0];
+			$solves{$colour} ||= [];
+			push @{$solves{$colour}}, $solve;
 		}
 
 		$cube->unmove(@$solve);
 	}
 
-	foreach my $color (sort keys %solves) {
-		foreach my $solve (sort @{$solves{$color}}) {
+	foreach my $colour (sort keys %solves) {
+		foreach my $solve (sort @{$solves{$colour}}) {
 			my @solve = @$solve;
-			@solve = $cube->rotateMovesToBottom($color, @solve)
+			@solve = $cube->rotateMovesToBottom($colour, @solve)
 				if $options{rotate};
-			say __x("color {color}: {solve}",
-				color => $color,
+			say __x("colour {colour}: {solve}",
+				colour => $colour,
 				solve => join ' ', @solve,
 			);
 		}
@@ -104,13 +104,13 @@ sub __solveAnyCross {
 			my ($path) = @_;
 
 			LAYER: foreach my $i (0 .. 5) {
-				my @colors = uniq @{$self->{__state}}[@{$crossIndicesFlattened[$i]}];
-				next LAYER if $#colors;
+				my @colours = uniq @{$self->{__state}}[@{$crossIndicesFlattened[$i]}];
+				next LAYER if $#colours;
 
 				my $edge_indices = $self->{__edgeIndicesFlattened}->[$i];
 				foreach my $face (0 .. 2) {
-					@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
-					next LAYER if $#colors;
+					@colours = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+					next LAYER if $#colours;
 				}
 
 				push @solves, [$p->translatePath($path)];
@@ -129,12 +129,12 @@ sub __solveAnyCross {
 sub __solveCross {
 	my ($self, $cube, %options) = @_;
 
-	my $color = $options{color};
-	my $layer = $cube->findLayer($color)
+	my $colour = $options{colour};
+	my $layer = $cube->findLayer($colour)
 		or Games::CuboidPuzzle::CLI->commandUsageError(cross
-			=> __x("this cube has no color '{color}'", color => $color));
+			=> __x("this cube has no colour '{colour}'", colour => $colour));
 
-	if ($cube->conditionCrossSolved($options{color})) {
+	if ($cube->conditionCrossSolved($options{colour})) {
 		Games::CuboidPuzzle::CLI->commandUsageError(cross
 			=> __"this cross is already solved on this cube");
 	}
@@ -152,12 +152,12 @@ sub __solveCross {
 		$p->permute($depth, sub {
 			my ($path) = @_;
 
-			my @colors = uniq @{$cube->{__state}}[@crossIndicesFlattened];
-			return 1 if $#colors;
+			my @colours = uniq @{$cube->{__state}}[@crossIndicesFlattened];
+			return 1 if $#colours;
 
 			foreach my $face (0 .. 2) {
-				@colors = uniq @{$cube->{__state}}[@{$edge_indices->[$face]}];
-				return 1 if $#colors;
+				@colours = uniq @{$cube->{__state}}[@{$edge_indices->[$face]}];
+				return 1 if $#colours;
 			}
 
 			push @solves, [$p->translatePath($path)];
@@ -179,7 +179,8 @@ cuboid cross - Find solution to solve a cross
 
 =head1 SYNOPSIS
 
-    cuboid cross [<global options>] [--color=COLOR] MOVES...
+    cuboid cross [<global options>] [--colour=COLOUR] [--color=COLOR]
+        [--no-rotate] MOVES...
 
 =head1 DESCRIPTION
 
@@ -197,7 +198,8 @@ The cross must have all adjacent edges oriented and at the correct position.
 
 =item -c, --colour=COLOUR, --color=COLOR
 
-Try to solve only the cross of colour COLOuR (usually one of W, Y, R, O, G, or B).
+Try to solve only the cross of colour COLOUR (usually one of W, Y, R, O, G,
+or B).
 
 Note that sometimes the same sequence of moves solves multiple crosses.  In
 such cases, all solutions will be displayed, not only the one for the

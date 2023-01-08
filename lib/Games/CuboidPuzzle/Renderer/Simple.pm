@@ -22,7 +22,7 @@ sub render {
 	my $x = $cube->xwidth;
 	my $y = $cube->ywidth;
 	my $z = $cube->zwidth;
-	my $colors = $cube->colors;
+	my $colours = $cube->colours;
 	my @state = $cube->state;
 
 	my $dump = '';

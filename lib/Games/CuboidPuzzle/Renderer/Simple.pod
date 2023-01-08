@@ -1,4 +1,4 @@
-=head1 NAME 
+=head1 NAME
 
 Games::CuboidPuzzle::Renderer::Simple - Simple renderer for cubes
 
@@ -31,7 +31,7 @@ The constructor takes no arguments.
 =item B<render>
 
 Returns a string representation of the cube.  A 3x3 cube with the standard
-color scheme would yield this representation:
+colour scheme would yield this representation:
 
           G G G
           G G G

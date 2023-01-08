@@ -232,9 +232,9 @@ The number of cubelets on the y-axis, defaults to 3.
 
 The number of cubelets on the z-axis, defaults to 3.
 
-=item B<colors>
+=item B<colours>
 
-A reference to an array of 6 characters that denote the colors of the
+A reference to an array of 6 characters that denote the colours of the
 cube, defaults to C<['B', 'O', 'Y', 'R', 'W', 'G']> for the default cube design
 (blue, orange, yellow, red, white, green):
 
@@ -252,6 +252,8 @@ This represents a standard cube where the front face F is green, and the upside
 face U is white.  The green face is folded towards you, the blue one away
 from you, the orange one to the left, and the white and red faces are peeled
 off to the right.
+
+You can use "colors" as an alias.
 
 =back
 
@@ -324,7 +326,7 @@ The internal representation of the cube is a list, each item representing a
 sticker.
 
 Example: We take a cube with 4 cubelets in x-direction, 3 in y-direction, and
-2 in z-direction.  Unfolded it would look like this (with standard colors)
+2 in z-direction.  Unfolded it would look like this (with standard colours)
 
         B B B B
         B B B B

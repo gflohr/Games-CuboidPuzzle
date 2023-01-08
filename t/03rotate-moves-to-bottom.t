@@ -24,14 +24,14 @@ my @tests = (
 my $cube = Games::CuboidPuzzle->new;
 
 foreach my $test (@tests) {
-	my ($moves, $color, $wanted) = @$test;
+	my ($moves, $colour, $wanted) = @$test;
 	my @moves = split / +/, $moves;
 	my $cube = Games::CuboidPuzzle->new;
-	my @got = $cube->rotateMovesToBottom($color, @moves);
+	my @got = $cube->rotateMovesToBottom($colour, @moves);
 	my @wanted = split / +/, $wanted;
-	is_deeply \@got, \@wanted, "'$moves' rotated to face '$color'";
+	is_deeply \@got, \@wanted, "'$moves' rotated to face '$colour'";
 	ok $cube->conditionSolved,
-		"cube solved again after '$moves' rotate to face '$color'";
+		"cube solved again after '$moves' rotate to face '$colour'";
 }
 
 done_testing;

@@ -29,7 +29,7 @@ my %defaults = (
 	ywidth => 3,
 	zwidth => 3,
 	# FIXME! Optionally split by space if scalar!
-	colors => [qw(B O Y R W G)],
+	colours => [qw(B O Y R W G)],
 	# FIXME! Use identifiers, not packages!
 	renderer => Games::CuboidPuzzle::Renderer::Simple->new,
 	notation => 'conventional',
@@ -41,6 +41,7 @@ sub new {
 	my $self = {};
 	bless $self, $class;
 
+	$args{colours} //= $args{colors};
 	foreach my $key (keys %defaults) {
 		$self->{'__' . $key} = $args{$key} // $defaults{$key};
 	}
@@ -63,15 +64,15 @@ sub new {
 	}
 	$self->{__notation} = $notation->new;
 
-	if (@{$self->{__colors}} != 6) {
+	if (@{$self->{__colours}} != 6) {
 		require Carp;
-		Carp::croak(__"exactly 6 colors required")
+		Carp::croak(__"exactly 6 colours required")
 	}
 
-	my %colors = map { $_ => 1 } @{$self->{__colors}};
-	if (keys %colors != 6) {
+	my %colours = map { $_ => 1 } @{$self->{__colours}};
+	if (keys %colours != 6) {
 		require Carp;
-		Carp::croak(__"colors must be unique")
+		Carp::croak(__"colours must be unique")
 	}
 
 	my @dim_keys = qw(__xwidth __ywidth __zwidth);
@@ -366,7 +367,7 @@ sub __setup {
 	my ($x, $y, $z) = @{$self}{@dim_keys};
 
 	# First side (green).
-	@state[0 .. $x * $z - 1] = map { $self->{__colors}->[0] } (1 .. $x * $z);
+	@state[0 .. $x * $z - 1] = map { $self->{__colours}->[0] } (1 .. $x * $z);
 
 	# Second side (orange).
 	foreach (my $row = 0; $row < $y; ++$row) {
@@ -374,7 +375,7 @@ sub __setup {
 			my $offset = $x * $z
 				+ $row * ($z + $x) * 2
 				+ $col;
-			$state[$offset] = $self->{__colors}->[1];
+			$state[$offset] = $self->{__colours}->[1];
 		}
 	}
 
@@ -384,7 +385,7 @@ sub __setup {
 			my $offset = $x * $z + $z
 				+ $row * ($z + $x) * 2
 				+ $col;
-			$state[$offset] = $self->{__colors}->[2];
+			$state[$offset] = $self->{__colours}->[2];
 		}
 	}
 
@@ -394,7 +395,7 @@ sub __setup {
 			my $offset = $x * $z + $z + $x
 				+ $row * ($z + $x) * 2
 				+ $col;
-			$state[$offset] = $self->{__colors}->[3];
+			$state[$offset] = $self->{__colours}->[3];
 		}
 	}
 
@@ -404,14 +405,14 @@ sub __setup {
 			my $offset = $x * $z + $z + $x + $z
 				+ $row * ($z + $x) * 2
 				+ $col;
-			$state[$offset] = $self->{__colors}->[4];
+			$state[$offset] = $self->{__colours}->[4];
 		}
 	}
 
 	# Sixth side (blue).
 	my $offset = $x * $z + ($z + $x) * 2 * $y;
 	@state[$offset .. $offset + $x * $z - 1] =
-		map { $self->{__colors}->[5] } (1 .. $x * $z);
+		map { $self->{__colours}->[5] } (1 .. $x * $z);
 
 	return $self;
 }
@@ -422,7 +423,9 @@ sub ywidth { shift->{__ywidth} }
 
 sub zwidth { shift->{__zwidth} }
 
-sub colors { shift->{__colors} }
+sub colours { shift->{__colours} }
+
+sub colors { shift->{__colours} }
 
 sub state {
 	wantarray ? @{shift->{__state}} : join ':', @{shift->{__state} };
@@ -574,10 +577,10 @@ sub layerIndices {
 	my ($self, $i) = @_;
 
 	my $j = 0;
-	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+	my %colours = map { $_ => $j++ } @{$self->{__colours}};
 
-	if (exists $colors{$i}) {
-		$i = $colors{$i};
+	if (exists $colours{$i}) {
+		$i = $colours{$i};
 	} elsif ($i !~ /^[0-5]$/) {
 		require Carp;
 		Carp::croak(__x("invalid layer id '{id}'", id => $i));
@@ -595,10 +598,10 @@ sub layerIndicesFlattened {
 	my ($self, $i) = @_;
 
 	my $j = 0;
-	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+	my %colours = map { $_ => $j++ } @{$self->{__colours}};
 
-	if (exists $colors{$i}) {
-		$i = $colors{$i};
+	if (exists $colours{$i}) {
+		$i = $colours{$i};
 	} elsif ($i !~ /^[0-5]$/) {
 		require Carp;
 		Carp::croak(__x("invalid layer id '{id}'", id => $i));
@@ -611,10 +614,10 @@ sub crossIndicesFlattened {
 	my ($self, $i) = @_;
 
 	my $j = 0;
-	my %colors = map { $_ => $j++ } @{$self->{__colors}};
+	my %colours = map { $_ => $j++ } @{$self->{__colours}};
 
-	if (exists $colors{$i}) {
-		$i = $colors{$i};
+	if (exists $colours{$i}) {
+		$i = $colours{$i};
 	} elsif ($i !~ /^[0-5]$/) {
 		require Carp;
 		Carp::croak(__x("invalid layer id '{id}'", id => $i));
@@ -997,13 +1000,13 @@ sub __rotateInternalMove {
 }
 
 sub rotateMovesToBottom {
-	my ($self, $color, @moves) = @_;
+	my ($self, $colour, @moves) = @_;
 
-	my $layer = $self->findLayer($color);
+	my $layer = $self->findLayer($colour);
 	if (!defined $layer && $layer !~ /^[0..5]$/) {
 		require Carp;
-		Carp::croak(__x("cube has no layer with color '{color}'",
-		                color => $color));
+		Carp::croak(__x("cube has no layer with colour '{colour}'",
+		                colour => $colour));
 	}
 
 	# Which internal moves rotate a layer to the bottom.
@@ -1065,7 +1068,7 @@ sub rotateMovesToBottom {
 		$self->ultraFastMove(@$move);
 	}
 
-	my $new_layer = $self->findLayer($color);
+	my $new_layer = $self->findLayer($colour);
 	my @final_rotations;
 	if ($new_layer != 2) {
 		# Slice moves implicitely rotate the cube.
@@ -1121,15 +1124,15 @@ sub conditionSolved {
 
 	my $layerIndicesFlattened = $self->{__layerIndicesFlattened};
 	foreach my $i (0 .. 5) {
-		my @colors = uniq @{$self->{__state}}[@{$layerIndicesFlattened->[$i]}];
-		return if $#colors;
+		my @colours = uniq @{$self->{__state}}[@{$layerIndicesFlattened->[$i]}];
+		return if $#colours;
 	}
 
 	return $self;
 }
 
 sub findLayer {
-	my ($self, $color) = @_;
+	my ($self, $colour) = @_;
 
 	foreach my $layer (0 .. 5) {
 		my $layer_indices = $self->layerIndices($layer);
@@ -1146,7 +1149,7 @@ sub findLayer {
 				layer => $layer);
 		}
 		my $index = $stickers[$#stickers >> 1];
-		return $layer if $self->{__state}->[$index] eq $color;
+		return $layer if $self->{__state}->[$index] eq $colour;
 	}
 
 	return;
@@ -1156,15 +1159,15 @@ sub conditionCrossSolved {
 	my ($self, $layer) = @_;
 
 	my $crossIndicesFlattened = $self->{__crossIndicesFlattened}->[$layer];
-	my @colors = uniq @{$self->{__state}}[@$crossIndicesFlattened];
-	return if $#colors;
+	my @colours = uniq @{$self->{__state}}[@$crossIndicesFlattened];
+	return if $#colours;
 
 	# Check the edges. It is enough to check 3 sides because the 4th must be
 	# solved if the other 3 are okay.
 	my $edge_indices = $self->{__edgeIndicesFlattened}->[$layer];
 	foreach my $face (0 .. 2) {
-		@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
-		return if $#colors;
+		@colours = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+		return if $#colours;
 	}
 
 	return $self;
@@ -1175,13 +1178,13 @@ sub conditionAnyCrossSolved {
 
 	my $crossIndicesFlattened = $self->{__crossIndicesFlattened};
 	LAYER: foreach my $i (0 .. 5) {
-		my @colors = uniq @{$self->{__state}}[@{$crossIndicesFlattened->[$i]}];
-		next if $#colors;
+		my @colours = uniq @{$self->{__state}}[@{$crossIndicesFlattened->[$i]}];
+		next if $#colours;
 
 		my $edge_indices = $self->{__edgeIndicesFlattened}->[$i];
 		foreach my $face (0 .. 2) {
-			@colors = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
-			next LAYER if $#colors;
+			@colours = uniq @{$self->{__state}}[@{$edge_indices->[$face]}];
+			next LAYER if $#colours;
 		}
 
 		return $self;

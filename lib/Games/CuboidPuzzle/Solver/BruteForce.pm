@@ -37,8 +37,8 @@ sub solve {
 			my ($path) = @_;
 
 			foreach my $i (0 .. 5) {
-				my @colors = uniq @{$cube->{__state}}[@{$layerIndicesFlattened[$i]}];
-				return 1 if $#colors;
+				my @colours = uniq @{$cube->{__state}}[@{$layerIndicesFlattened[$i]}];
+				return 1 if $#colours;
 			}
 
 			push @solves, [$p->translatePath($path)];
